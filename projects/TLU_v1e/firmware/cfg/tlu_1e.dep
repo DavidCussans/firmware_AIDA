@@ -1,0 +1,8 @@
+# Entity payload is in tlu_1e.vhd
+# src tlu_1e.vhd
+
+src -c ipbus-firmware:components/ipbus_slaves ipbus_ctrlreg_v.vhd
+src -c ipbus-firmware:components/ipbus_core ipbus_fabric_sel.vhd
+src ipbus_decode_top.vhd
+addrtab -t TLUaddrmap.xml
+src -c ipbus-firmware:components/ipbus_slaves ipbus_reg_types.vhd
