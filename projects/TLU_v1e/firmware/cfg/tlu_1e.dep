@@ -6,3 +6,13 @@ src -c ipbus-firmware:components/ipbus_core ipbus_fabric_sel.vhd
 src ipbus_decode_top.vhd
 addrtab -t TLUaddrmap.xml
 src -c ipbus-firmware:components/ipbus_slaves ipbus_reg_types.vhd
+
+src -c comonents/tlu eventBuffer_rtl.vhd
+src -c comonents/logic_clocks_rtl.vhd
+src -c comonents/trigger/triggerInputs_newTLU_rtl.vhd
+src -c comonents/eventFormatter_rtl.vhd
+src -c comonents/T0_Shutter_Iface_rtl.vhd
+src -c comonents/dut/DUTInterfaces_rtl.vhd
+src -c comonents/dut/DUTInterface_AIDA_rtl.vhd
+src -c comonents/dut/DUTInterface_EUDET_rtl.vhd
+src -c comonents/trigger/triggerLogic_rtl.vhd
