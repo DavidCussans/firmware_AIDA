@@ -1,0 +1,77 @@
+--! @file dtype_fds.vhdl
+--
+-------------------------------------------------------------------------------
+-- --
+-- (c) University of Bristol, High Energy Physics Group --
+-- --
+-------------------------------------------------------------------------------
+--
+--
+-- This file is part of IPBus.
+--
+--    IPBus is free software: you can redistribute it and/or modify
+--    it under the terms of the GNU General Public License as published by
+--    the Free Software Foundation, either version 3 of the License, or
+--    (at your option) any later version.
+--
+--    IPBus is distributed in the hope that it will be useful,
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--    GNU General Public License for more details.
+--
+--    You should have received a copy of the GNU General Public License
+--    along with IPBus.  If not, see <http://www.gnu.org/licenses/>.
+--
+--    IPBus is free software: you can redistribute it and/or modify
+--    it under the terms of the GNU General Public License as published by
+--    the Free Software Foundation, either version 3 of the License, or
+--    (at your option) any later version.
+--
+--    IPBus is distributed in the hope that it will be useful,
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--    GNU General Public License for more details.
+--
+--    You should have received a copy of the GNU General Public License
+--    along with IPBus.  If not, see <http://www.gnu.org/licenses/>.
+--
+--
+--! Standard library
+library IEEE;
+
+-- Standard logic defintions.
+use IEEE.STD_LOGIC_1164.all;
+
+--
+-- unit name: dtype_fds
+--
+--! @brief   Aims to be the same as the Xilinx "FDS" primitive - D-Type flip-flop
+--
+--
+--! @author David.Cussans@bristol.ac.uk
+--
+--! @date 7/May/2011
+--
+--! @version 0.1
+--
+--! @details -- Modified from D-type example in VHDL book.
+--! See Xilinx spartan6_scm.pdf
+--! Output goes high when input goes high ( asyncnronous to system clock).
+--
+--! <b>Dependencies:</b>\n
+--!
+--! <b>References:</b>\n
+--! <reference one> \n
+--! <reference two>
+--!
+--! <b>Modified by:</b>\n
+--! Author: <name>
+-------------------------------------------------------------------------------
+--! \n\n<b>Last changes:</b>\n
+--! <date> <initials> <log>\n
+--! <extended description>
+-------------------------------------------------------------------------------
+--! @todo <next thing to do> \n
+--! <another thing to do> \n
+--
+-------------------------------------------------------------------------------
