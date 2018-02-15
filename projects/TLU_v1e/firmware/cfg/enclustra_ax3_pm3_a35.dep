@@ -4,5 +4,4 @@ src --cd ../ucf enclustra_ax3_pm3.tcl
 src --cd ../ucf I2C_constr.xdc
 src --cd ../ucf TLU_enclustra_v1e.xdc
 
-# include -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth a35.dep
-# include -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth enclustra_ax3_pm3_a35.dep
+include -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth enclustra_ax3_pm3_a35.dep
