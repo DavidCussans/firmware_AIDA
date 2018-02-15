@@ -12,7 +12,7 @@ src -c components/tlu logic_clocks_rtl.vhd
 src -c components/tlu trigger/triggerInputs_newTLU_rtl.vhd
 src -c components/tlu eventFormatter_rtl.vhd
 src -c components/tlu T0_Shutter_Iface_rtl.vhd
-src -c components/tlu/dut DUTInterfaces_rtl.vhd
-src -c components/tlu/dut DUTInterface_AIDA_rtl.vhd
-src -c components/tlu/dut DUTInterface_EUDET_rtl.vhd
-src -c components/tlu/trigger triggerLogic_rtl.vhd
+src -c components/tlu dut/DUTInterfaces_rtl.vhd
+src -c components/tlu dut/DUTInterface_AIDA_rtl.vhd
+src -c components/tlu dut/DUTInterface_EUDET_rtl.vhd
+src -c components/tlu trigger/triggerLogic_rtl.vhd
