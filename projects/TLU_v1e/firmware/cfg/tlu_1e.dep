@@ -21,6 +21,7 @@ src -c components/tlu synchronizeRegisters_rtl.vhd
 src -c components/tlu trigger/arrivalTimeLUT_rtl.vhd
 src -c components/tlu counterWithReset_rtl.vhd
 src -c components/tlu trigger/dualSERDES_1to4_rtl.vhd
+src -c components/tlu trigger/IODELAYCal_FSM_rtl.vhd
 src -c components/tlu pulseClockDomainCrossing_rtl.vhd
 src -c components/tlu single_pulse_rtl.vhd
 src -c components/tlu stretchPulse_rtl.vhd
@@ -32,4 +33,9 @@ src -c components/tlu --cd ../cgn internalTriggerGenerator.xci
 
 
 # Include I2C components
-include -c ipbus-firmware:components/opencores_i2c
+include -c components/external/opencores_i2c i2c_master_top.vhd 
+include -c components/external/opencores_i2c i2c_master_bit_ctrl.vhd
+include -c components/external/opencores_i2c i2c_master_byte_ctrl.vhd
+include -c components/external/opencores_i2c i2c_master_registers.vhd
+include -c components/external/opencores_i2c i2c_master_rtl.vhd
+
