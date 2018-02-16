@@ -1,4 +1,4 @@
 include enclustra_ax3_pm3_a35.dep
 include tlu_1e.dep
 
-setup set_top.tcl
+# setup set_top.tcl

@@ -16,3 +16,20 @@ src -c components/tlu dut/DUTInterfaces_rtl.vhd
 src -c components/tlu dut/DUTInterface_AIDA_rtl.vhd
 src -c components/tlu dut/DUTInterface_EUDET_rtl.vhd
 src -c components/tlu trigger/triggerLogic_rtl.vhd
+
+src -c components/tlu synchronizeRegisters_rtl.vhd
+src -c components/tlu trigger/arrivalTimeLUT_rtl.vhd
+src -c components/tlu counterWithReset_rtl.vhd
+src -c components/tlu trigger/dualSERDES_1to4_rtl.vhd
+src -c components/tlu pulseClockDomainCrossing_rtl.vhd
+src -c components/tlu single_pulse_rtl.vhd
+src -c components/tlu stretchPulse_rtl.vhd
+src -c components/tlu coincidenceLogic_rtl.vhd
+
+# Inclide IP ( *.xci files )
+src -c components/tlu --cd ../cgn tlu_event_fifo.xci
+src -c components/tlu --cd ../cgn internalTriggerGenerator.xci
+
+
+# Include I2C components
+include -c ipbus-firmware:components/opencores_i2c
