@@ -35,15 +35,16 @@ entity top_tlu_v1e is
     );
     port(
     --Clock
-        --sysclk: in std_logic; --50 MHz clock input from FPGA
-        clk_enclustra: in std_logic; --Enclustra onboard oscillator 40 MHz. Used for the IPBus block
+        sysclk: in std_logic; --50 MHz clock input from FPGA
+        --clk_enclustra: in std_logic; --Enclustra onboard oscillator 50 MHz. Used for the IPBus block
         sysclk_50_o_p : out std_logic; --50 MHz clock output to FMC pins
         sysclk_50_o_n : out std_logic; --50 MHz clock output to FMC pins
         sysclk_40_i_p: in std_logic;
         sysclk_40_i_n: in std_logic;
     --Misc
         leds: out std_logic_vector(3 downto 0); -- status LEDs
-        dip_sw: in std_logic_vector(3 downto 0); -- switches
+        --dip_sw: in std_logic_vector(3 downto 0); -- switches
+        --cfg: in std_logic_vector(3 downto 0); -- switches
         gpio: out std_logic; -- gpio pin on J1 (eventually make it inout)
     --RGMII interface signals
         rgmii_txd: out std_logic_vector(3 downto 0);
@@ -423,7 +424,7 @@ begin
 			sysclk => clk_encl_buf,
 			clk_ipb_o => clk_ipb,
 			rst_ipb_o => rst_ipb,
-			rst_125_o => phy_rst_e,
+			rst125_o => phy_rst_e,
 			clk_200_o => clk_200,
 			nuke => nuke,
 			soft_rst => soft_rst,
@@ -443,8 +444,8 @@ begin
 	--leds <= not ('0' & userled & inf_leds); -- Check this.
 	phy_rstn <= not phy_rst_e;
 		
---	mac_addr <= X"020ddba1151" & dip_sw; -- Careful here, arbitrary addresses do not always work
---	ip_addr <= X"c0a8c81" & dip_sw; -- 192.168.200.16+n
+--	mac_addr <= X"020ddba1151" & cfg; -- Careful here, arbitrary addresses do not always work
+--	ip_addr <= X"c0a8c81" & cfg; -- 192.168.200.16+n
 	mac_addr <= X"020ddba1151e"; -- Careful here, arbitrary addresses do not always work
 	ip_addr <= X"c0a8c81e"; -- 192.168.200.16+n
 
@@ -735,7 +736,7 @@ begin
     IBUFG_inst: IBUFG
     port map (
         O => clk_encl_buf,
-        I => clk_enclustra--sysclk
+        I => sysclk -- clk_enclustra
     );    
 
 ------------------------------------------

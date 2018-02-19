@@ -1,6 +1,6 @@
 #
 src top_enclustra_tlu_v1e.vhd
-src --cd ../ucf enclustra_ax3_pm3.tcl
+# src --cd ../ucf enclustra_ax3_pm3.tcl
 src --cd ../ucf I2C_constr.xdc
 src --cd ../ucf TLU_enclustra_v1e.xdc
 
