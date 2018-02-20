@@ -3,7 +3,7 @@
 <node id="TLU">
 
 <!-- Registers for the DUTs. These should be correct -->
-<node id="DUTInterfaces" address="0x1000" description="DUT Interfaces control registers">
+<node id="DUTInterfaces" address="0x1000" description="DUT Interfaces control registers" fwinfo="endpoint;width=4">
   <node id="DutMaskW"           address="0x0" permission="w" description="" />
   <node id="IgnoreDUTBusyW"     address="0x1" permission="w" description="" />
   <node id="IgnoreShutterVetoW" address="0x2" permission="w" description="" />
@@ -16,12 +16,12 @@
   <node id="IgnoreShutterVetoR" address="0xA" permission="r" description="" />
 </node>
 
-<node id="Shutter"    address="0x2000" description="Shutter/T0 control">
+<node id="Shutter"    address="0x2000" description="Shutter/T0 control" fwinfo="endpoint;width=4">
   <node id="ShutterStateW" address="0x0" permission="w" description=""/>
   <node id="PulseT0"  address="0x1" permission="w" description=""/>
 </node>
 <!-- I2C registers. Tested ok.-->
-<node id="i2c_master"      address="0x3000" description="I2C Master interface">
+<node id="i2c_master"      address="0x3000" description="I2C Master interface" fwinfo="endpoint;width=3">
   <node id="i2c_pre_lo"    address="0x0" mask="0x000000ff" permission="rw" description="" />
   <node id="i2c_pre_hi"    address="0x1" mask="0x000000ff" permission="rw" description="" />
   <node id="i2c_ctrl"      address="0x2" mask="0x000000ff" permission="rw" description="" />
@@ -29,21 +29,21 @@
   <node id="i2c_cmdstatus" address="0x4" mask="0x000000ff" permission="rw" description="" />
 </node>
 <!-- Not sure about the FillLevelFlags register -->
-<node id="eventBuffer" address="0x4000" description="Event buffer">
+<node id="eventBuffer" address="0x4000" description="Event buffer" fwinfo="endpoint;width=2">
   <node id="EventFifoData" address="0x0" mode="non-incremental" size="32000" permission="r" description="" />
   <node id="EventFifoFillLevel" address="0x1" permission="r" description="" />
   <node id="EventFifoCSR" address="0x2" permission="rw" description="" />
   <node id="EventFifoFillLevelFlags" address="0x3" permission="r" description="" />
 </node>
 <!-- Event formatter registers. Should be ok -->
-<node id="Event_Formatter"      address="0x5000" description="Event formatter configuration">
+<node id="Event_Formatter"      address="0x5000" description="Event formatter configuration" fwinfo="endpoint;width=3">
   <node id="Enable_Record_Data" address="0x0" permission="rw" description="" />
   <node id="ResetTimestampW"    address="0x1" permission="w" description="" />
   <node id="CurrentTimestampLR" address="0x2" permission="r" description="" />
   <node id="CurrentTimestampHR" address="0x3" permission="r" description="" />
 </node>
 <!-- This needs checking. The counters work, not sure about the reset -->
-<node id="triggerInputs" address="0x6000" description="Inputs configuration">
+<node id="triggerInputs" address="0x6000" description="Inputs configuration" fwinfo="endpoint;width=4">
   <node id="SerdesRstW" address="0x0" permission="w" description="" />
   <node id="SerdesRstR" address="0x8" permission="r" description="" />
   <node id="ThrCount0R" address="0x9" permission="r" description="" />
@@ -54,7 +54,7 @@
   <node id="ThrCount5R" address="0xe" permission="r" description="" />
 </node>
 <!-- Checked. Seems ok now, except for the TriggerVeto that do nothing.-->
-<node id="triggerLogic" address="0x7000" description="Trigger logic configuration">
+<node id="triggerLogic" address="0x7000" description="Trigger logic configuration" fwinfo="endpoint;width=4">
   <node id="PostVetoTriggersR" address="0x10" permission="r" description="" />
   <node id="PreVetoTriggersR" address="0x11" permission="r" description="" />
   <node id="InternalTriggerIntervalW" address="0x2" permission="w" description="" />
@@ -89,12 +89,12 @@
 -->
 </node>
 
-<node id="logic_clocks" address="0x8000" description="Clocks configuration">
+<node id="logic_clocks" address="0x8000" description="Clocks configuration" fwinfo="endpoint;width=2">
   <node id="LogicClocksCSR" address="0x0" permission="rw" description="" />
   <node id="LogicRst" address="0x1" permission="w" description="" />
 </node>
 
-<node id="version" address="0x1" description="firmware version" permission="r">
+<node id="version" address="0x1" description="firmware version" permission="r" fwinfo="endpoint;width=0">
 </node>
 
 <!--

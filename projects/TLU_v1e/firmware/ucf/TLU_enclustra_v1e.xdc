@@ -5,16 +5,16 @@
 #set_property PACKAGE_PIN H1 [get_ports {threshold_discr_p_i[5]}]
 
 set_property IOSTANDARD LVDS_25 [get_ports {threshold_discr_n_i[*]}]
-set_property PACKAGE_PIN B1 [get_ports {threshold_discr_p_i[0]}]
 set_property PACKAGE_PIN A1 [get_ports {threshold_discr_n_i[0]}]
-set_property PACKAGE_PIN C4 [get_ports {threshold_discr_p_i[1]}]
+set_property PACKAGE_PIN B1 [get_ports {threshold_discr_p_i[0]}]
 set_property PACKAGE_PIN B4 [get_ports {threshold_discr_n_i[1]}]
-set_property PACKAGE_PIN K2 [get_ports {threshold_discr_p_i[2]}]
+set_property PACKAGE_PIN C4 [get_ports {threshold_discr_p_i[1]}]
 set_property PACKAGE_PIN K1 [get_ports {threshold_discr_n_i[2]}]
-set_property PACKAGE_PIN C6 [get_ports {threshold_discr_p_i[3]}]
+set_property PACKAGE_PIN K2 [get_ports {threshold_discr_p_i[2]}]
 set_property PACKAGE_PIN C5 [get_ports {threshold_discr_n_i[3]}]
-set_property PACKAGE_PIN J4 [get_ports {threshold_discr_p_i[4]}]
+set_property PACKAGE_PIN C6 [get_ports {threshold_discr_p_i[3]}]
 set_property PACKAGE_PIN H4 [get_ports {threshold_discr_n_i[4]}]
+set_property PACKAGE_PIN J4 [get_ports {threshold_discr_p_i[4]}]
 set_property PACKAGE_PIN G1 [get_ports {threshold_discr_n_i[5]}]
 set_property PACKAGE_PIN H1 [get_ports {threshold_discr_p_i[5]}]
 
@@ -107,10 +107,16 @@ create_clock -period 25.000 -name sysclk_40_i_p -waveform {0.000 12.500} [get_po
 # What has gone wrong ....
 # FIXME
 #set_clock_groups -asynchronous -group {sysclk clk_ipb_i} -group {sysclk_40_i_p pll_base_inst_n_2 s_clk160}
-set_clock_groups -asynchronous -group {sysclk clk_ipb_i} -group {sysclk_40_i_p s_clk160}
+#set_clock_groups -asynchronous -group {sysclk clk_ipb_i} -group {sysclk_40_i_p s_clk160}
+#set_clock_groups -asynchronous -group { [get_nets sysclk] } -group { [get_nets *sysclk_40_i*]}
 
 set_input_delay -clock [get_clocks [get_clocks -of_objects [get_pins I4/pll_base_inst/CLKOUT0]]] -rise -min 0.300 [get_ports -regexp -filter { NAME =~  ".*thresh.*" && DIRECTION == "IN" }]
 set_input_delay -clock [get_clocks [get_clocks -of_objects [get_pins I4/pll_base_inst/CLKOUT0]]] -rise -max 0.400 [get_ports -regexp -filter { NAME =~  ".*thresh.*" && DIRECTION == "IN" }]
 
 
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+
+# -false_path 
+
+set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {sysclk clk_ipb_i}] -group [get_clocks -include_generated_clocks {s_clk160 sysclk_40_i_p}]
+

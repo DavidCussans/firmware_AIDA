@@ -11,7 +11,7 @@ library UNISIM;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 use work.fmcTLU.all;
-use work.ipbus_decode_tlu.all;
+use work.ipbus_decode_TLUaddrmap.all;
 use work.ipbus.all;
 use work.ipbus_reg_types.all;
 use UNISIM.vcomponents.all;
@@ -138,8 +138,8 @@ architecture rtl of top_tlu_v1e is
     SIGNAL strobe_8x_logic      : std_logic;                                             --! Pulses one cycle every 4 of 16x clock.
     SIGNAL strobe_4x_logic       : std_logic;                                             -- one pulse every 4 cycles of clk_4x
     SIGNAL trigger_count         : std_logic_vector(g_IPBUS_WIDTH-1 DOWNTO 0);
-    SIGNAL trigger_times         : t_triggerTimeArray(g_NUM_TRIG_INPUTS-1 DOWNTO 0);      -- ! trigger arrival time ( w.r.t. logic_strobe)
-    SIGNAL triggers              : std_logic_vector(g_NUM_TRIG_INPUTS-1 DOWNTO 0);
+    SIGNAL trigger_times         : t_triggerTimeArray(g_NUM_TRIG_INPUTS-1 DOWNTO 0);      --! trigger arrival time ( w.r.t. logic_strobe)
+    SIGNAL triggers              : std_logic_vector(g_NUM_TRIG_INPUTS-1 DOWNTO 0);        --! Rising edge of trigger inputs
     SIGNAL veto_o                : std_logic;                                             --! goes high when one or more DUT are busy
 	signal ctrl, stat: ipb_reg_v(0 downto 0);
 	--My signals
@@ -178,12 +178,16 @@ architecture rtl of top_tlu_v1e is
 ----------------------------------------------
 ----------------------------------------------
     COMPONENT T0_Shutter_Iface
+      generic (
+        g_NUM_ACCELERATOR_SIGNALS: positive := 6
+        );
     PORT (
         clk_4x_i      : IN     std_logic;
-        clk_4x_strobe : IN     std_logic;
+        clk_4x_strobe_i : IN     std_logic;
         ipbus_clk_i   : IN     std_logic;
         ipbus_i       : IN     ipb_wbus;
         T0_o          : OUT    std_logic;
+        accelerator_signals_i : in std_logic_vector(g_NUM_ACCELERATOR_SIGNALS-1 DOWNTO 0);  
         ipbus_o       : OUT    ipb_rbus;
         shutter_o     : OUT    std_logic
     );
@@ -454,8 +458,8 @@ begin
     port map(
         clk => clk_ipb,
         reset => rst_ipb,
-        ipbus_in => ipbww(N_SLV_CTRL_REG),
-        ipbus_out => ipbrr(N_SLV_CTRL_REG),
+        ipbus_in => ipbww(N_SLV_VERSION),
+        ipbus_out => ipbrr(N_SLV_VERSION),
         d => stat,
         q => ctrl
     );
@@ -471,7 +475,7 @@ begin
     port map(
       ipb_in => ipb_out,
       ipb_out => ipb_in,
-      sel => ipbus_sel_ipbus_example(ipb_out.ipb_addr),
+      sel => ipbus_sel_TLUaddrmap(ipb_out.ipb_addr),
       ipb_to_slaves => ipbww,
       ipb_from_slaves => ipbrr
     );
@@ -482,11 +486,11 @@ begin
         i2c_scl_i     => i2c_scl_b,
         i2c_sda_i     => i2c_sda_b,
         ipbus_clk_i   => clk_ipb,
-        ipbus_i       => ipbww(N_SLV_I2C_0),
+        ipbus_i       => ipbww(N_SLV_I2C_MASTER),
         ipbus_reset_i => rst_ipb,
         i2c_scl_enb_o => s_i2c_scl_enb,
         i2c_sda_enb_o => s_i2c_sda_enb,
-        ipbus_o       => ipbrr(N_SLV_I2C_0)
+        ipbus_o       => ipbrr(N_SLV_I2C_MASTER)
     );
     
 ----------------------------------------------
@@ -496,13 +500,13 @@ begin
     )
     PORT MAP (
         ipbus_clk_i           => clk_ipb,
-        ipbus_i               => ipbww(N_SLV_LGCCLK),
+        ipbus_i               => ipbww(N_SLV_LOGIC_CLOCKS),
         ipbus_reset_i         => rst_ipb,
         Reset_i               => logic_clocks_reset,
         clk_logic_xtal_i      => sysclk_40, -- Not sure this is correct
         clk_8x_logic_o       => clk_8x_logic,
         clk_4x_logic_o        => clk_4x_logic,
-        ipbus_o               => ipbrr(N_SLV_LGCCLK),
+        ipbus_o               => ipbrr(N_SLV_LOGIC_CLOCKS),
         strobe_8x_logic_o    => strobe_8x_logic,
         strobe_4x_logic_o     => strobe_4x_logic,
         DUT_clk_o             => open,
@@ -532,8 +536,8 @@ begin
         edge_falling_o       => s_edge_falling,
         ipbus_clk_i          => clk_ipb,
         ipbus_reset_i        => rst_ipb,
-        ipbus_i              => ipbww(N_SLV_TRGIN),
-        ipbus_o              => ipbrr(N_SLV_TRGIN),
+        ipbus_i              => ipbww(N_SLV_TRIGGERINPUTS),
+        ipbus_o              => ipbrr(N_SLV_TRIGGERINPUTS),
         clk_8x_logic_i      => clk_8x_logic,
         strobe_8x_logic_i   => strobe_8x_logic
     );
@@ -569,8 +573,8 @@ begin
         edge_fall_i            => s_edge_falling,
         edge_rise_time_i       => s_edge_rise_times,
         edge_fall_time_i       => s_edge_fall_times,
-        ipbus_i                => ipbww(N_SLV_EVFMT),
-        ipbus_o                => ipbrr(N_SLV_EVFMT),
+        ipbus_i                => ipbww(N_SLV_EVENT_FORMATTER),
+        ipbus_o                => ipbrr(N_SLV_EVENT_FORMATTER),
         data_strobe_o          => data_strobe,
         event_data_o           => event_data,
         reset_timestamp_i      => T0_o,
@@ -590,12 +594,12 @@ begin
         data_strobe_i     => data_strobe,
         event_data_i      => event_data,
         ipbus_clk_i       => clk_ipb,
-        ipbus_i           => ipbww(N_SLV_EVBUF),
+        ipbus_i           => ipbww(N_SLV_EVENTBUFFER),
         ipbus_reset_i     => rst_ipb,
         strobe_4x_logic_i => strobe_4x_logic,
         rst_fifo_o        => rst_fifo_o,
         buffer_full_o     => buffer_full_o,
-        ipbus_o           => ipbrr(N_SLV_EVBUF),
+        ipbus_o           => ipbrr(N_SLV_EVENTBUFFER),
         logic_reset_i     => logic_reset
     );
     
@@ -603,12 +607,13 @@ begin
     I8 : T0_Shutter_Iface
     PORT MAP (
         clk_4x_i      => clk_4x_logic,
-        clk_4x_strobe => strobe_4x_logic,
+        clk_4x_strobe_i => strobe_4x_logic,
+        accelerator_signals_i => triggers,
         T0_o          => T0_o,
         shutter_o     => s_shutter,
         ipbus_clk_i   => clk_ipb,
-        ipbus_i       => ipbww(N_SLV_SHUT),
-        ipbus_o       => ipbrr(N_SLV_SHUT)
+        ipbus_i       => ipbww(N_SLV_SHUTTER),
+        ipbus_o       => ipbrr(N_SLV_SHUTTER)
     );
 
 ------------------------------------------
@@ -625,9 +630,9 @@ begin
          reset_or_clk_to_dut_i   => T0_o,
          shutter_to_dut_i        => s_shutter,
          ipbus_clk_i             => clk_ipb,
-         ipbus_i                 => ipbww(N_SLV_DUT),
+         ipbus_i                 => ipbww(N_SLV_DUTINTERFACES),
          ipbus_reset_i           => rst_ipb,
-         ipbus_o                 => ipbrr(N_SLV_DUT),
+         ipbus_o                 => ipbrr(N_SLV_DUTINTERFACES),
          busy_from_dut       => busy_i,
          busy_to_dut        => open,
          clk_from_dut => dut_clk_i,
@@ -651,7 +656,7 @@ begin
         PORT MAP (
             clk_4x_logic_i      => clk_4x_logic,
             ipbus_clk_i         => clk_ipb,
-            ipbus_i             => ipbww(N_SLV_TRGLGC),
+            ipbus_i             => ipbww(N_SLV_TRIGGERLOGIC),
             ipbus_reset_i       => rst_ipb,
             logic_reset_i       => s_triggerLogic_reset,
             logic_strobe_i      => strobe_4x_logic,
@@ -661,7 +666,7 @@ begin
             trigger_o           => postVetotrigger,
             trigger_times_o     => postVetoTrigger_times,
             event_number_o      => trigger_count,
-            ipbus_o             => ipbrr(N_SLV_TRGLGC),
+            ipbus_o             => ipbrr(N_SLV_TRIGGERLOGIC),
             post_veto_trigger_o => overall_trigger,
             pre_veto_trigger_o  => OPEN,
             trigger_active_o    => leds(2)
