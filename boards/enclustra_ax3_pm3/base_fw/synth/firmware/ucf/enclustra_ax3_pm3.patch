@@ -1,0 +1,36 @@
+--- /users/phdgc//DUNE/firmware/PDTS/work/build/src/ipbus-firmware/boards/enclustra_ax3_pm3/base_fw/synth/firmware/ucf/enclustra_ax3_pm3.tcl	2017-08-22 15:31:37.014565607 +0100
++++ ../../src/ipbus-firmware/boards/enclustra_ax3_pm3/base_fw/synth/firmware/ucf/enclustra_ax3_pm3.tcl	2018-02-19 09:57:25.320449541 +0000
+@@ -20,9 +20,11 @@
+ set_false_path -through [get_nets infra/clocks/nuke_i]
+ 
+ set_property IOSTANDARD LVCMOS25 [get_ports sysclk]
++#set_property IOSTANDARD LVCMOS33 [get_ports sysclk]
+ set_property PACKAGE_PIN P17 [get_ports sysclk]
+ 
+ set_property IOSTANDARD LVCMOS25 [get_ports {leds[*]}]
++#set_property IOSTANDARD LVCMOS33 [get_ports {leds[*]}]
+ set_property SLEW SLOW [get_ports {leds[*]}]
+ set_property PACKAGE_PIN M16 [get_ports {leds[0]}]
+ set_property PACKAGE_PIN M17 [get_ports {leds[1]}]
+@@ -43,13 +45,15 @@
+ set_property PACKAGE_PIN V16 [get_ports {rgmii_rxd[3]}]
+ set_property PACKAGE_PIN R16 [get_ports {rgmii_rx_ctl}]
+ set_property PACKAGE_PIN T14 [get_ports {rgmii_rxc}]
++
+ set_property PACKAGE_PIN M13 [get_ports {phy_rstn}]
+ false_path {phy_rstn} sysclk
+ 
+-set_property IOSTANDARD LVCMOS25 [get_ports {cfg[*]}]
+-set_property PULLUP TRUE [get_ports {cfg[*]}]
+-set_property PACKAGE_PIN K2 [get_ports {cfg[0]}]
+-set_property PACKAGE_PIN K1 [get_ports {cfg[1]}]
+-set_property PACKAGE_PIN J4 [get_ports {cfg[2]}]
+-set_property PACKAGE_PIN H4 [get_ports {cfg[3]}]
++
++#set_property IOSTANDARD LVCMOS25 [get_ports {cfg[*]}]
++#set_property PULLUP TRUE [get_ports {cfg[*]}]
++#set_property PACKAGE_PIN K2 [get_ports {cfg[0]}]
++#set_property PACKAGE_PIN K1 [get_ports {cfg[1]}]
++#set_property PACKAGE_PIN J4 [get_ports {cfg[2]}]
++#set_property PACKAGE_PIN H4 [get_ports {cfg[3]}]
+ 
