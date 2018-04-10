@@ -43,7 +43,8 @@ src -c components/tlu coincidenceLogic_rtl.vhd
 #src -c components/tlu ipbus_decode_tlu.vhd
 # ***** CHANGE ME ******
 # Fixed ?
-src -c components/tlu ipbus_decode_TLUaddrmap.vhd
+#src -c components/tlu ipbus_decode_TLUaddrmap.vhd
+src -c projects/TLU_v1e ipbus_decode_TLUaddrmap.vhd
 
 
 # Include I2C components
