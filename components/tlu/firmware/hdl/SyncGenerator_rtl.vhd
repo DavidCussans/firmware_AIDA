@@ -58,6 +58,9 @@ ENTITY syncGenerator IS
 
       enable_sequence_i : in std_logic ; --! take high to enable sequence
 
+      enable_internal_cycle_i : in std_logic ; --! take high to enable internal sequence
+      internal_cycle_length_i : IN STD_LOGIC_VECTOR(g_IPBUS_WIDTH-1 downto 0); --! Length of internally generated strobe cycle.
+
       --! Output Signals
       shutter_o: OUT STD_LOGIC;
       trigger_veto_o: OUT STD_LOGIC
@@ -73,9 +76,9 @@ ARCHITECTURE rtl OF syncGenerator IS
   signal s_trigger, s_counter_enable, s_reset_counter: std_logic :='0';
   -- constant c_SELWIDTH : integer := 4; --! Up to 16 different trigger sources
   signal s_trigger_source_select: std_logic_vector(c_SELWIDTH-1 downto 0);
-  signal s_counter_lt_t1 , s_counter_lt_t2 , s_counter_lt_t3 : std_logic := '0';
+  signal s_counter_lt_t1 , s_counter_lt_t2 , s_counter_lt_t3 , s_counter_gt_cycle : std_logic := '0';
   signal s_shutter , s_veto : std_logic := '0';
-  signal s_threshold_t1,s_threshold_t3,s_threshold_t2: unsigned(g_COUNTER_WIDTH-1 downto 0);
+  signal s_threshold_t1,s_threshold_t3,s_threshold_t2, s_internal_cycle_length : unsigned(g_COUNTER_WIDTH-1 downto 0);
 BEGIN
 
 
@@ -126,18 +129,24 @@ BEGIN
   s_sel <= to_integer(unsigned(s_trigger_source_select));
 
   --! Process to register trigger input
-  p_inputSelect: PROCESS (clock_i)
+  p_triggerSelect: PROCESS (clock_i)
   BEGIN
     IF rising_edge(clock_i) and (strobe_i='1') THEN
-      s_trigger <= trigger_sources_i( s_sel);
+      if (enable_internal_cycle_i='0') then
+        s_trigger <= trigger_sources_i(s_sel); --! Trigger on external signals if not generating internal cycles
+      else
+        s_trigger <= s_counter_gt_cycle; --! Trigger on internal cycle
+      end if;
+
     END IF;
-  END PROCESS p_inputSelect;
+  END PROCESS p_triggerSelect;
 
 
   -- Trim threshold values and convert to unsigned.
   s_threshold_t1 <= unsigned(threshold_t1_i(s_threshold_t1'range));
   s_threshold_t2 <= unsigned(threshold_t2_i(s_threshold_t2'range));
   s_threshold_t3 <= unsigned(threshold_t3_i(s_threshold_t3'range));
+  s_internal_cycle_length <= unsigned(internal_cycle_length_i(s_internal_cycle_length'range) );
 
   --! Process to drive s_counter_lt_t1 , s_counter_lt_t2, s_counter_lt_t3
   p_comparators: PROCESS (clock_i)
@@ -162,6 +171,11 @@ BEGIN
         s_counter_lt_t3 <= '0';
       end if;
 
+      if unsigned(s_counter_value) > s_internal_cycle_length then
+        s_counter_gt_cycle <= '1';
+      else
+        s_counter_gt_cycle <= '0';
+      end if;
 
     END IF;
   END PROCESS p_comparators;
