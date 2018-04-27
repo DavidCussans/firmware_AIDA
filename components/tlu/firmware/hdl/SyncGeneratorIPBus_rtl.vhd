@@ -18,6 +18,9 @@ use ieee.numeric_std.all;
 use work.ipbus.all;
 use work.ipbus_reg_types.all;
 
+--! Include math_real to get ceil and log2
+-- use IEEE.math_real.all;
+
 --! @brief Generates a sync signal for, eg. KPix
 --
 --! @author David Cussans , David.Cussans@bristol.ac.uk
@@ -68,27 +71,30 @@ END syncGeneratorIPBus;
 
 ARCHITECTURE rtl OF syncGeneratorIPBus IS
 
-  constant c_SELWIDTH : integer := integer(ceil(log2(real(g_NUM_TRIG_SOURCES))));
+  --constant c_SELWIDTH : integer := integer(ceil(log2(real(g_NUM_TRIG_SOURCES))));
 
   signal s_sel : integer := 0;
   signal s_counter_value: std_logic_vector(g_COUNTER_WIDTH downto 0); -- One wider that comparator values.
   signal s_trigger, s_counter_enable, s_reset_counter: std_logic :='0';
 
-  signal s_trigger_source_select: std_logic_vector(c_SELWIDTH-1 downto 0);
+  signal s_trigger_source_select: std_logic_vector(g_IPBUS_WIDTH-1 downto 0);
   signal s_counter_lt_t1 , s_counter_lt_t2 , s_counter_lt_t3 , s_counter_gt_cycle : std_logic := '0';
   signal s_shutter , s_veto : std_logic := '0';
-  signal s_threshold_t1,s_threshold_t3,s_threshold_t2, s_internal_cycle_length : unsigned(g_COUNTER_WIDTH-1 downto 0);
+  signal s_threshold_t1,s_threshold_t3,s_threshold_t2, s_internal_cycle_length : std_logic_vector(g_IPBUS_WIDTH-1 downto 0);
 
   signal s_enable_sequence : std_logic ; --! take high to enable sequence
   signal s_enable_internal_cycle : std_logic ; --! take high to enable internal sequence
-  signal s_internal_cycle_length : STD_LOGIC_VECTOR(g_IPBUS_WIDTH-1 downto 0); --! Length of internally generated strobe cycle.
+  -- signal s_internal_cycle_length : STD_LOGIC_VECTOR(g_IPBUS_WIDTH-1 downto 0); --! Length of internally generated strobe cycle.
 
-  signal s_ipbus_statusregs:   ipb_reg_v(N_STAT - 1 downto 0);
-  signal s_ipbus_controlregs:  ipb_reg_v(N_CTRL - 1 downto 0);
 
-  constant c_NUM_CTRL_REGS := 6;
-  constant c_CTRL_REGS_WIDTH : integer := constant c_SELWIDTH : integer := integer(ceil(log2(real(c_NUM_CTRL_REGS))));
+  constant c_NUM_CTRL_REGS  : integer := 6;
+  constant c_NUM_STAT_REGS  : integer := 1;
+  signal s_ipbus_statusregs:   ipb_reg_v(c_NUM_STAT_REGS - 1 downto 0) := (others => (others => '0'));
+  signal s_ipbus_controlregs:  ipb_reg_v(c_NUM_CTRL_REGS - 1 downto 0);
 
+  constant c_ipbus_qmask : ipb_reg_v(c_NUM_CTRL_REGS  - 1 downto 0) := (others => (others => '1'));
+
+begin
 
 cmp_SyncGen: entity work.syncGenerator
     generic map (
@@ -110,29 +116,32 @@ cmp_SyncGen: entity work.syncGenerator
               shutter_o               => shutter_o,
               trigger_veto_o          => trigger_veto_o );
 
-cmp_ipbusReg: entity work.ipbus_ctrlreg_sync is
-              	generic(
-              		ctrl_addr_width => c_CTRL_REGS_WIDTH
-              	);
-              	port(
-              		clk => clock_i,
-              		reset => reset_i,
-              		ipbus_in => ipb_in,
-              		ipbus_out => ipb_out,
-              		ctrl_clk => ipb_clk_i,
-              		d => s_ipbus_statusregs,
-              		q => s_ipbus_controlregs,
-                  stb => s_strobe
-              	);
+cmp_ipbusReg: entity work.ipbus_syncreg_v
+                      generic map(
+                              N_CTRL => c_NUM_CTRL_REGS,
+                              N_STAT => c_NUM_STAT_REGS
+                      )
+                      port map (
+                              clk => ipb_clk_i,
+                              rst => reset_i,
+                              ipb_in => ipb_in,
+                              ipb_out => ipb_out,
+                              slv_clk => clock_i,
+                              d => s_ipbus_statusregs,
+                              q=> s_ipbus_controlregs,
+                              qmask => c_ipbus_qmask,
+                              stb => open,
+                              rstb => open
+                      );
 
-s_enable_sequence <= s_enable_sequence(0)(0);
-s_enable_internal_cycle <= s_enable_sequence(0)(1);
-s_trigger_source_select <= s_enable_sequence(1)(s_trigger_source_select'range);
+s_enable_sequence <= s_ipbus_controlregs(0)(0);
+s_enable_internal_cycle <= s_ipbus_controlregs(0)(1);
+s_trigger_source_select <= s_ipbus_controlregs(1);
 
-s_threshold_t1 <= s_enable_sequence(3)(s_threshold_t1'range);
-s_threshold_t2 <= s_enable_sequence(4)(s_threshold_t2'range);
-s_threshold_t3 <= s_enable_sequence(5)(s_threshold_t3'range);
+s_threshold_t1 <= s_ipbus_controlregs(3);
+s_threshold_t2 <= s_ipbus_controlregs(4);
+s_threshold_t3 <= s_ipbus_controlregs(5);
 
-s_internal_cycle_length <= s_enable_sequence(2)(s_internal_cycle_length'range);
+s_internal_cycle_length <= s_ipbus_controlregs(2);
 
 END rtl;
