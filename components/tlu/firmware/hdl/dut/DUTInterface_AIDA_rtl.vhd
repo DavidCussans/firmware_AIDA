@@ -39,7 +39,7 @@ ENTITY DUTInterface_AIDA IS
       shutter_to_dut_i        : IN     std_logic;      --! Goes high to indicate data-taking active. DUTs report busy unless ignore_shutter_veto  flag is set high
       ignore_shutter_veto_i   : in     std_logic;
       ignore_dut_busy_i       : in     std_logic;
-      dut_mask_i              : in     std_logic;      --! Set high if DUT is active.
+      --dut_mask_i              : in     std_logic;      --! Set high if DUT is active. Moved one level up
       busy_o                  : OUT    std_logic;      --! goes high when DUT is busy or vetoed by shutter
       
       -- Signals to/from DUT
@@ -138,11 +138,12 @@ BEGIN
       --busy_o <= ((not ignore_shutter_veto_i ) and (not shutter_to_dut_i)) or
       --          ((dut_busy_i and DUT_mask_i ) and (not ignore_dut_busy_i) );
                 
-      busy_o <= ((not ignore_shutter_veto_i ) and (not shutter_to_dut_i)) or
-                ( (dut_busy_i and DUT_mask_i )  );
+      --busy_o <= ((not ignore_shutter_veto_i ) and (not shutter_to_dut_i)) or ( (dut_busy_i and DUT_mask_i )  );
+      busy_o <= ((not ignore_shutter_veto_i ) and (not shutter_to_dut_i)) or ( dut_busy_i    );
 
       dut_clk_o <= s_dut_clk ;
-      dut_trigger_o <= DUT_mask_i and s_trigger_out;
+      --dut_trigger_o <= DUT_mask_i and s_trigger_out;
+      dut_trigger_o <= s_trigger_out;
       
     end if;
   end process register_signals;

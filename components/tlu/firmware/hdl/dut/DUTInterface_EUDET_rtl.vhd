@@ -132,8 +132,12 @@ end process;
       elsif (state = WAIT_FOR_BUSY_HIGH ) then        
 	-- only clock out bottom 15 bits of data. 
         -- (replace fixed width with a mask at some stage ?)
-	trig_shift_reg <=  "00000000000000000" & trigger_counter_copy(14 downto 0);
+	   trig_shift_reg <=  "00000000000000000" & trigger_counter_copy(14 downto 0);
         serial_trig_data <= '0';
+      end if;
+      
+      if ( state = IDLE ) and ( trigger_i = '1') then
+        trigger_counter_copy <= trigger_counter_i; -- register the trigger number to shift it out
       end if;
 
     end if;
@@ -151,7 +155,7 @@ end process;
       when IDLE =>
         if ( trigger_i = '1') then  -- respond to trigger going high
           next_state <= WAIT_FOR_BUSY_HIGH;  -- wait for DUT to respond to busy
-          trigger_counter_copy <= trigger_counter_i; -- register the trigger number to shift it out
+          --trigger_counter_copy <= trigger_counter_i; -- register the trigger number to shift it out
 
         elsif ( (dut_clk_r2 = '1') and (enable_dut_veto_i = '1') ) then      -- If DUT asserts DUT_CLK_I then veto triggers
           next_state <= DUT_INITIATED_VETO;          

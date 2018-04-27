@@ -291,7 +291,7 @@ BEGIN
         shutter_to_dut_i        => shutter_to_dut_i ,
         ignore_shutter_veto_i   => s_IgnoreShutterVeto ,
         ignore_dut_busy_i       => s_DUT_ignore_busy(dut),
-        dut_mask_i              => s_DUT_mask(dut),
+        --dut_mask_i              => s_DUT_mask(dut),
         busy_o                  => s_dut_veto_aida(dut),
       
         -- Signals to/from DUT
@@ -346,8 +346,8 @@ BEGIN
   p_signal_mux: process (clk_4x_logic_i ) is
   begin  -- process p_signal_mux
     if rising_edge(clk_4x_logic_i) then
-      s_trigger_to_dut <= ( s_trigger_to_dut_eudet and (not s_DUT_aida_eudet_mode)) or ( s_trigger_to_dut_aida and  s_DUT_aida_eudet_mode) ;
-      s_dut_veto <= ( s_dut_veto_eudet and (not s_DUT_aida_eudet_mode)) or ( s_dut_veto_aida and  s_DUT_aida_eudet_mode) ;
+      s_trigger_to_dut <= (( s_trigger_to_dut_eudet and (not s_DUT_aida_eudet_mode)) or ( s_trigger_to_dut_aida and  s_DUT_aida_eudet_mode)) and s_DUT_mask ; -- move DutMask one level up to affect both AIDA and EUDET modes
+      s_dut_veto <= (( s_dut_veto_eudet and (not s_DUT_aida_eudet_mode)) or ( s_dut_veto_aida and  s_DUT_aida_eudet_mode)) and s_DUT_mask ; -- move DutMask one level up to affect both AIDA and EUDET modes
       s_shutter_to_dut <= ( s_shutter_to_dut_eudet and (not s_DUT_aida_eudet_mode)) or ( s_shutter_to_dut_aida and  s_DUT_aida_eudet_mode) ; 
       s_reset_or_clk_to_dut <= ( s_reset_or_clk_to_dut_aida and  s_DUT_aida_eudet_mode) ; --! reset_or_clk line stays low if in EUDET mode
       
