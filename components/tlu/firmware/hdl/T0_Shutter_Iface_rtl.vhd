@@ -80,8 +80,7 @@ ARCHITECTURE rtl OF T0_Shutter_Iface IS
 
   signal s_enable_sequence : std_logic ; --! take high to enable sequence
   signal s_enable_internal_cycle : std_logic ; --! take high to enable internal sequence
-  -- signal s_internal_cycle_length : STD_LOGIC_VECTOR(g_IPBUS_WIDTH-1 downto 0); --! Length of internally generated strobe cycle.
-
+  signal s_T0_ipbus : std_logic; --! T0 synchronization signal on IPBus clock domain.
 
   constant c_NUM_CTRL_REGS  : integer := 8;
   constant c_NUM_STAT_REGS  : integer := 1;

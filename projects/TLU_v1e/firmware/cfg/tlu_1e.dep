@@ -4,6 +4,9 @@
 addrtab -t TLUaddrmap.xml
 
 src -c ipbus-firmware:components/ipbus_slaves ipbus_ctrlreg_v.vhd
+src -c ipbus-firmware:components/ipbus_slaves ipbus_syncreg_v.vhd
+src -c ipbus-firmware:components/ipbus_slaves syncreg_w.vhd
+src -c ipbus-firmware:components/ipbus_slaves syncreg_r.vhd
 src -c ipbus-firmware:components/ipbus_core ipbus_fabric_sel.vhd
 src ipbus_decode_top.vhd
 
