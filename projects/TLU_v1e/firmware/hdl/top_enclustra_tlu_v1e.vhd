@@ -23,7 +23,7 @@ use work.ipbus.ALL;
 
 entity top_tlu_v1e is
     generic(
-    constant FW_VERSION : unsigned(31 downto 0):= X"1e000008"; -- Firmware revision. Remember to change this as needed.
+    constant FW_VERSION : unsigned(31 downto 0):= X"1e00000f"; -- Firmware revision. Remember to change this as needed.
     g_NUM_DUTS  : positive := 4; -- <- was 3
     g_NUM_TRIG_INPUTS   :positive := 6;-- <- was 4
     g_NUM_EDGE_INPUTS   :positive := 6;--  <-- was 4
@@ -141,6 +141,7 @@ architecture rtl of top_tlu_v1e is
     SIGNAL trigger_times         : t_triggerTimeArray(g_NUM_TRIG_INPUTS-1 DOWNTO 0);      --! trigger arrival time ( w.r.t. logic_strobe)
     SIGNAL triggers              : std_logic_vector(g_NUM_TRIG_INPUTS-1 DOWNTO 0);        --! Rising edge of trigger inputs
     SIGNAL veto_o                : std_logic;                                             --! goes high when one or more DUT are busy
+    signal shutter_veto_o        : std_logic;  --! Goes high when triggers should be vetoed by shutter
 	signal ctrl, stat: ipb_reg_v(0 downto 0);
 	--My signals
 	--SIGNAL busy_toggle_o         : std_logic_vector(g_NUM_DUTS-1 downto 0);
@@ -189,6 +190,7 @@ architecture rtl of top_tlu_v1e is
         T0_o          : OUT    std_logic;
         accelerator_signals_i : in std_logic_vector(g_NUM_ACCELERATOR_SIGNALS-1 DOWNTO 0);  
         ipbus_o       : OUT    ipb_rbus;
+        shutter_veto_o: out    std_logic;
         shutter_o     : OUT    std_logic
     );
     END COMPONENT T0_Shutter_Iface;
@@ -405,7 +407,7 @@ begin
     -- ModuleWare code(v1.12) for instance 'I19' of 'merge'
     --gpio_hdr <= dout1 & dout & s_shutter & T0_o;
     -- ModuleWare code(v1.12) for instance 'I8' of 'sor'
-    overall_veto <= buffer_full_o OR veto_o;
+    overall_veto <= buffer_full_o OR veto_o or shutter_veto_o;
     -- ModuleWare code(v1.12) for instance 'I16' of 'sor'
     s_triggerLogic_reset <= logic_reset OR T0_o;
 
@@ -611,6 +613,7 @@ begin
         accelerator_signals_i => triggers,
         T0_o          => T0_o,
         shutter_o     => s_shutter,
+        shutter_veto_o => shutter_veto_o,
         ipbus_clk_i   => clk_ipb,
         ipbus_i       => ipbww(N_SLV_SHUTTER),
         ipbus_o       => ipbrr(N_SLV_SHUTTER)
