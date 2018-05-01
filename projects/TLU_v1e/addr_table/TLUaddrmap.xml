@@ -17,8 +17,13 @@
 </node>
 
 <node id="Shutter"    address="0x2000" description="Shutter/T0 control" fwinfo="endpoint;width=4">
-  <node id="ShutterStateW" address="0x0" permission="w" description=""/>
-  <node id="PulseT0"  address="0x1" permission="w" description=""/>
+  <node id="ControlW"               address="0x0" permission="w" description="Bit-0 controls if shutter pulses are active. 1 = active"/>
+  <node id="ShutterSelectW"         address="0x1" permission="w" description="Selects which input is used to trigger shutter"/>
+  <node id="InternalShutterPeriodW" address="0x2" permission="w" description="Internal trig generator period ( units = number of strobe pulses)"/>
+  <node id="ShutterOnTimeW"         address="0x3" permission="w" description="Time between input trigger being received and shutter asserted(T1) ( units = number of strobe pulses)"/>
+  <node id="ShutterOnTimeW"         address="0x4" permission="w" description="time between input trigger and veto being de-asserted(T2) ( units = number of strobe pulses)"/>
+  <node id="ShutterOnTimeW"         address="0x5" permission="w" description="time at which shutter de-asserted(T3) ( units = number of strobe pulses)"/>  
+  <node id="PulseT0"                address="0x8" permission="w" description="Writing to Bit-0 of this register causes sync line to pulse for one strobe-pulse interval"/>
 </node>
 <!-- I2C registers. Tested ok.-->
 <node id="i2c_master"      address="0x3000" description="I2C Master interface" fwinfo="endpoint;width=3">

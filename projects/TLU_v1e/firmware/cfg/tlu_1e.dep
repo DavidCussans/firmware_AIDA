@@ -17,6 +17,8 @@ src -c components/tlu logic_clocks_rtl.vhd
 src -c components/tlu trigger/triggerInputs_newTLU_rtl.vhd
 src -c components/tlu eventFormatter_rtl.vhd
 src -c components/tlu T0_Shutter_Iface_rtl.vhd
+src -c components/tlu SyncGenerator_rtl.vhd
+src -c components/tlu counterWithResetPreset_rtl.vhd
 src -c components/tlu counterDownGated_rtl.vhd
 src -c components/tlu delayPulse4x_rtl.vhd
 src -c components/tlu stretchPulse4x_rtl.vhd

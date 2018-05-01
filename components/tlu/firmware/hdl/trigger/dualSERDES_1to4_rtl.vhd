@@ -315,7 +315,7 @@ BEGIN
         DATA_RATE => "DDR",
         DATA_WIDTH => 4,
         INTERFACE_TYPE=> "NETWORKING", --Not sure this is correct
-        IOBDELAY => "BOTH", --same as above
+        IOBDELAY => "IFD", -- see table 3-4 in UG471 (v1.9)
         SERDES_MODE => "MASTER",
         NUM_CE => 1
     )
@@ -378,7 +378,7 @@ BEGIN
            DATA_RATE => "DDR",
            DATA_WIDTH => 4,
            INTERFACE_TYPE=> "NETWORKING", --Not sure this is correct
-           IOBDELAY => "BOTH", --same as above
+           IOBDELAY =>  "IFD", -- see table 3-4 in UG471 (v1.9)
            SERDES_MODE => "MASTER",
            NUM_CE => 1
        )
