@@ -100,7 +100,7 @@ begin
               g_IPBUS_WIDTH           => g_IPBUS_WIDTH ,
               g_NUM_TRIG_SOURCES      => g_NUM_ACCELERATOR_SIGNALS  )
     port map (
-              clk_4x_i                 => clk_4x_i,
+              clock_i                 => clk_4x_i,
               reset_i                 => reset_i,
               strobe_i                => clk_4x_strobe_i,
               trigger_sources_i       => accelerator_signals_i,
