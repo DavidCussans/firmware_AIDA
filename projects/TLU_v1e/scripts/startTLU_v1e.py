@@ -83,7 +83,8 @@ class MyPrompt(cmd.Cmd):
         else:
             runN= arglist[0]
 
-        logdata= True
+#        logdata= True
+        logdata= False
 
         #TLU.start(logdata)
         if (TLU.isRunning): #Prevent double start

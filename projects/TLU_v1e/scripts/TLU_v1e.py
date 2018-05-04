@@ -401,6 +401,12 @@ class TLU:
         print "\tShutter control read back as:" , hex(shutterControl)
         return shutterControl
 
+    def getShutterSource(self):
+        shutterSource = self.hw.getNode("Shutter.ShutterSelectW").read()
+        self.hw.dispatch()
+        print "\tShutter source read back as:" , shutterSource
+        return shutterSource
+
     def getShutterInternalInterval(self):
         shutterInternalInterval = self.hw.getNode("Shutter.InternalShutterPeriodW").read()
         self.hw.dispatch()
@@ -424,14 +430,18 @@ class TLU:
         self.hw.dispatch()
         print "\tVeto off time:" , vetoofftime
         return vetoofftime
-    
-
-    
-    def pulseT0(self):
+        
+    def setRunActive(self):
         cmd = int("0x1",16)
         self.hw.getNode("Shutter.PulseT0").write(cmd)
         self.hw.dispatch()
-        print "\tPulsing T0"
+        print "\tSet run active (pulsing T0)"
+
+    def setRunInactive(self):
+        cmd = int("0x0",16)
+        self.hw.getNode("Shutter.PulseT0").write(cmd)
+        self.hw.dispatch()
+        print "\tSet run inactive"
 
     def readEEPROM(self, startadd, bytes):
         mystop= 1
@@ -552,6 +562,12 @@ class TLU:
         self.hw.getNode("Shutter.ControlW").write(controlWord)
         self.hw.dispatch()
         self.getShutterControl()
+
+    def setShutterSource(self, source):
+        print "  SHUTTER SOURCE:", hex(source)
+        self.hw.getNode("Shutter.ShutterSelectW").write(source)
+        self.hw.dispatch()
+        self.getShutterSource()
 
     def setShutterInternalInterval(self, interval):
         print "  SHUTTER INTERNAL INTERVAL:", interval
@@ -900,6 +916,9 @@ class TLU:
         triggerInterval= parsed_cfg.getint(section_name, "InternalTriggerFreq")
         self.setInternalTrg(triggerInterval)
 
+        shutterSource  = int(parsed_cfg.get(section_name, "ShutterSource"), 16)
+        self.setShutterSource(shutterSource)
+
         shutterControl = int(parsed_cfg.get(section_name, "ShutterControl"), 16)
         self.setShutterControl(shutterControl)
 
@@ -936,7 +955,8 @@ class TLU:
             self.setRecordDataStatus(False)
 
         # Pulse T0
-        self.pulseT0()
+        #self.pulseT0()
+        self.setRunActive()
 
         print "  Turning off software trigger veto"
         self.setTriggerVetoStatus( int("0x0",16) )
@@ -958,6 +978,9 @@ class TLU:
         self.getFifoCSR()
         print "  Turning on software trigger veto"
         self.setTriggerVetoStatus( int("0x1",16) )
+
+        print "Turning off shutter (setting run inactive)"
+        self.setRunInactive()
 
         nFifoWords= int(eventFifoFillLevel)
         fifoData= self.getFifoData(nFifoWords)

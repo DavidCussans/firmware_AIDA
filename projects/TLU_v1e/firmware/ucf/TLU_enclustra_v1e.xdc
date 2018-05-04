@@ -5,18 +5,18 @@
 #set_property PACKAGE_PIN H1 [get_ports {threshold_discr_p_i[5]}]
 
 set_property IOSTANDARD LVDS_25 [get_ports {threshold_discr_n_i[*]}]
-set_property PACKAGE_PIN A1 [get_ports {threshold_discr_n_i[0]}]
 set_property PACKAGE_PIN B1 [get_ports {threshold_discr_p_i[0]}]
-set_property PACKAGE_PIN B4 [get_ports {threshold_discr_n_i[1]}]
+set_property PACKAGE_PIN A1 [get_ports {threshold_discr_n_i[0]}]
 set_property PACKAGE_PIN C4 [get_ports {threshold_discr_p_i[1]}]
-set_property PACKAGE_PIN K1 [get_ports {threshold_discr_n_i[2]}]
+set_property PACKAGE_PIN B4 [get_ports {threshold_discr_n_i[1]}]
 set_property PACKAGE_PIN K2 [get_ports {threshold_discr_p_i[2]}]
-set_property PACKAGE_PIN C5 [get_ports {threshold_discr_n_i[3]}]
+set_property PACKAGE_PIN K1 [get_ports {threshold_discr_n_i[2]}]
 set_property PACKAGE_PIN C6 [get_ports {threshold_discr_p_i[3]}]
-set_property PACKAGE_PIN H4 [get_ports {threshold_discr_n_i[4]}]
+set_property PACKAGE_PIN C5 [get_ports {threshold_discr_n_i[3]}]
 set_property PACKAGE_PIN J4 [get_ports {threshold_discr_p_i[4]}]
-set_property PACKAGE_PIN G1 [get_ports {threshold_discr_n_i[5]}]
+set_property PACKAGE_PIN H4 [get_ports {threshold_discr_n_i[4]}]
 set_property PACKAGE_PIN H1 [get_ports {threshold_discr_p_i[5]}]
+set_property PACKAGE_PIN G1 [get_ports {threshold_discr_n_i[5]}]
 
 ## Miscellaneous I/O
 set_property IOSTANDARD LVCMOS25 [get_ports clk_gen_rst]
@@ -27,8 +27,8 @@ set_property PACKAGE_PIN F6 [get_ports gpio]
 
 ## Crystal clock
 set_property IOSTANDARD LVDS_25 [get_ports sysclk_40_i_p]
-set_property PACKAGE_PIN T4 [get_ports sysclk_40_i_n]
 set_property PACKAGE_PIN T5 [get_ports sysclk_40_i_p]
+set_property PACKAGE_PIN T4 [get_ports sysclk_40_i_n]
 
 ## Output clock (currently not working so set to 0)
 set_property IOSTANDARD LVCMOS25 [get_ports sysclk_50_o_p]
@@ -116,7 +116,8 @@ set_input_delay -clock [get_clocks [get_clocks -of_objects [get_pins I4/pll_base
 
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
 
-# -false_path 
+# -false_path
 
 set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {sysclk clk_ipb_i}] -group [get_clocks -include_generated_clocks {s_clk160 sysclk_40_i_p}]
+
 
