@@ -167,7 +167,7 @@ begin
       clk_4x_i      => clk_4x_i,
       clk_4x_strobe_i => clk_4x_strobe_i,
 --      pulse_i       => s_run_active,
-      pulse_i       => s_T0_ipbus 
+      pulse_i       => s_T0_ipbus, 
       pulse_o       => T0_o);
 
 END rtl;
