@@ -38,8 +38,8 @@ cd proj/TLU_1e
 
 ipbb vivado project
 # Set correct file as design "top"
-echo "BUILD: Setting the correct design as top"
-vivado -mode tcl -nojournal -nolog -notrace -source ../../src/firmware_AIDA/projects/TLU_v1e/firmware/cfg/set_top.tcl top/top.xpr
+#echo "BUILD: Setting the correct design as top"
+#vivado -mode tcl -nojournal -nolog -notrace -source ../../src/firmware_AIDA/projects/TLU_v1e/firmware/cfg/set_top.tcl top/top.xpr
 
 
 echo "BUILD: ipbb impl"

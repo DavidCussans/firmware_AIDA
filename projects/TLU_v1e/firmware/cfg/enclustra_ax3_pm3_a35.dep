@@ -1,8 +1,19 @@
+@device_family = "artix7"
+@device_name = "xc7a35t"
+@device_package = "csg324"
+@device_speed = "-2"
+@boardname = "enclustra_ax3_pm3"
+
+setup settings_v7.tcl
+include -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth enclustra_ax3_pm3_infra.dep
+src -c ipbus-firmware:components/ipbus_core ipbus_package.vhd
+src -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth --cd ../ucf enclustra_ax3_pm3.tcl
+
 #
 src top_enclustra_tlu_v1e.vhd
 # src --cd ../ucf enclustra_ax3_pm3.tcl
 src --cd ../ucf I2C_constr.xdc
 src --cd ../ucf TLU_enclustra_v1e.xdc
 
-include -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth enclustra_ax3_pm3_a35.dep
+#include -c ipbus-firmware:boards/enclustra_ax3_pm3/base_fw/synth enclustra_ax3_pm3_a35.dep
 
