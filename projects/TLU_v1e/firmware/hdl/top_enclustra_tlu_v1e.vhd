@@ -4,7 +4,9 @@
 --
 -- You must edit this file to set the IP and MAC addresses
 --
--- Dave Newbold, 4/10/16--
+-- Modified by merging IPBus Emclustra template written by Dave Newbold, 4/10/16--
+-- and AIDA miniTLU code 
+-- Paolo Baesso 2017
 
 library IEEE;
 library UNISIM;
@@ -21,7 +23,7 @@ use UNISIM.vcomponents.all;
 
 use work.ipbus.ALL;
 
-entity top_tlu_v1e is
+entity top is
     generic(
     constant FW_VERSION : unsigned(31 downto 0):= X"1e00000f"; -- Firmware revision. Remember to change this as needed.
     g_NUM_DUTS  : positive := 4; -- <- was 3
@@ -86,9 +88,9 @@ entity top_tlu_v1e is
         --extclk_p_b: inout std_logic
     );
 
-end top_tlu_v1e;
+end top;
 
-architecture rtl of top_tlu_v1e is
+architecture rtl of top is
 
 	signal clk_ipb, rst_ipb, nuke, soft_rst, phy_rst_e, clk_200, sysclk_40, clk_encl_buf, userled: std_logic;
 	signal mac_addr: std_logic_vector(47 downto 0);
