@@ -25,7 +25,7 @@ use work.ipbus.ALL;
 
 entity top is
     generic(
-    constant FW_VERSION : unsigned(31 downto 0):= X"1e00000f"; -- Firmware revision. Remember to change this as needed.
+    constant FW_VERSION : unsigned(31 downto 0):= X"1e000010"; -- Firmware revision. Remember to change this as needed.
     g_NUM_DUTS  : positive := 4; -- <- was 3
     g_NUM_TRIG_INPUTS   :positive := 6;-- <- was 4
     g_NUM_EDGE_INPUTS   :positive := 6;--  <-- was 4
@@ -162,6 +162,7 @@ architecture rtl of top is
         trigger_i               : IN     std_logic ;                                  --! goes high when trigger logic issues a trigger
         reset_or_clk_to_dut_i   : IN     std_logic ;                                  --! Synchronization signal. Passed TO DUT pins
         shutter_to_dut_i        : IN     std_logic ;                                  --! Goes high TO indicate data-taking active. DUTs report busy unless ignoreShutterVeto IPBus flag is set high
+        shutter_veto_i          : IN     std_logic;                                    --! WHen high DUTs report busy unless ignoreShutterVeto IPBus flag is set high
         -- IPBus signals.
         ipbus_clk_i             : IN     std_logic ;
         ipbus_i                 : IN     ipb_wbus ;                                   --! Signals from IPBus core TO slave
@@ -409,7 +410,7 @@ begin
     -- ModuleWare code(v1.12) for instance 'I19' of 'merge'
     --gpio_hdr <= dout1 & dout & s_shutter & T0_o;
     -- ModuleWare code(v1.12) for instance 'I8' of 'sor'
-    overall_veto <= buffer_full_o OR veto_o or shutter_veto_o;
+    overall_veto <= buffer_full_o OR veto_o ; -- or shutter_veto_o;
     -- ModuleWare code(v1.12) for instance 'I16' of 'sor'
     s_triggerLogic_reset <= logic_reset OR T0_o;
 
@@ -634,6 +635,7 @@ begin
          trigger_i               => overall_trigger,
          reset_or_clk_to_dut_i   => T0_o,
          shutter_to_dut_i        => s_shutter,
+         shutter_veto_i          => shutter_veto_o,
          ipbus_clk_i             => clk_ipb,
          ipbus_i                 => ipbww(N_SLV_DUTINTERFACES),
          ipbus_reset_i           => rst_ipb,

@@ -20,7 +20,8 @@ class AD5665R:
             cmdDAC= [0x38,0x00,0x00]
         self.i2c.write( self.slaveaddr, cmdDAC, mystop)
         if verbose:
-            print "DAC int ref:", intRef
+            print "  AD5665R"
+            print "\tDAC int ref:", intRef
 
 
     def writeDAC(self, dacCode, channel, verbose=False):

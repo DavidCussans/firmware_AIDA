@@ -17,8 +17,8 @@ verbose = True
 # */
 ################################################################################
 
-
-
+### Same as the class defined in I2CuHal.py but the register names are changed to
+### comply with D. Newbold's notation. To be used in the Dune SFP Fanout (pc059a)
 
 class I2CCore:
     """I2C communication block."""
@@ -41,11 +41,11 @@ class I2CCore:
         self.target = target
         self.name = name
         self.delay = delay
-        self.prescale_low = self.target.getNode("%s.i2c_pre_lo" % name)
-        self.prescale_high = self.target.getNode("%s.i2c_pre_hi" % name)
-        self.ctrl = self.target.getNode("%s.i2c_ctrl" % name)
-        self.data = self.target.getNode("%s.i2c_rxtx" % name)
-        self.cmd_stat = self.target.getNode("%s.i2c_cmdstatus" % name)
+        self.prescale_low = self.target.getNode("%s.ps_lo" % name)
+        self.prescale_high = self.target.getNode("%s.ps_hi" % name)
+        self.ctrl = self.target.getNode("%s.ctrl" % name)
+        self.data = self.target.getNode("%s.data" % name)
+        self.cmd_stat = self.target.getNode("%s.cmd_stat" % name)
         self.wishboneclock = wclk
         self.i2cclock = i2cclk
         self.config()
@@ -77,7 +77,7 @@ class I2CCore:
         self.target.dispatch()
         #Write pre-scale register
         #prescale = int(self.wishboneclock / (5.0 * self.i2cclock)) - 1
-        #prescale = int(self.wishboneclock / (5.0 * self.i2cclock)) 
+        #prescale = int(self.wishboneclock / (5.0 * self.i2cclock))
         prescale = 0x0100 #FOR NOW HARDWIRED, TO BE MODIFIED
         self.prescale_low.write(prescale & 0xff)
         self.prescale_high.write((prescale & 0xff00) >> 8)
@@ -130,6 +130,7 @@ class I2CCore:
         if not ack:
             self.cmd_stat.write(I2CCore.stopcmd)
             self.target.dispatch()
+            print "no ack from I2C address", hex(addr>>1)
             return nwritten
         nwritten += 1
         for val in data:

@@ -9,11 +9,11 @@
   <node id="IgnoreShutterVetoW" address="0x2" permission="w" description="" />
   <node id="DUTInterfaceModeW"  address="0x3" permission="w" description="" />
   <node id="DUTInterfaceModeModifierW"  address="0x4" permission="w" description="" />
-  <node id="DUTInterfaceModeR"  address="0xB" permission="r" description="" />
-  <node id="DUTInterfaceModeModifierR"  address="0xC" permission="r" description="" />
   <node id="DutMaskR"           address="0x8" permission="r" description="" />
   <node id="IgnoreDUTBusyR"     address="0x9" permission="r" description="" />
   <node id="IgnoreShutterVetoR" address="0xA" permission="r" description="" />
+  <node id="DUTInterfaceModeR"  address="0xB" permission="r" description="" />
+  <node id="DUTInterfaceModeModifierR"  address="0xC" permission="r" description="" />
 </node>
 
 <node id="Shutter"    address="0x2000" description="Shutter/T0 control" fwinfo="endpoint;width=4">

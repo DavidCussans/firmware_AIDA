@@ -61,7 +61,8 @@ ENTITY DUTInterfaces IS
       trigger_counter_i       : IN     std_logic_vector (g_IPBUS_WIDTH-1 DOWNTO 0);  --! Number of trigger events since last reset
       trigger_i               : IN     std_logic;                                    --! goes high when trigger logic issues a trigger
       reset_or_clk_to_dut_i   : IN     std_logic;                                    --! Synchronization signal. Passed to DUT pins
-      shutter_to_dut_i        : IN     std_logic;                                    --! Goes high to indicate data-taking active. DUTs report busy unless ignoreShutterVeto IPBus flag is set high
+      shutter_to_dut_i        : IN     std_logic;                                    --! Goes high to indicate data-taking active. 
+      shutter_veto_i          : IN     std_logic;                                    --! WHen high DUTs report busy unless ignoreShutterVeto IPBus flag is set high
       -- IPBus signals.
       ipbus_clk_i             : IN     std_logic;
       ipbus_i                 : IN     ipb_wbus;                                     --! Signals from IPBus core to slave
@@ -103,7 +104,8 @@ ARCHITECTURE rtl OF DUTInterfaces IS
   signal s_clk_to_DUT_AIDA , s_busy_from_dut_aida , s_dut_veto_aida , s_reset_or_clk_to_dut_aida , s_trigger_to_dut_aida , s_shutter_to_dut_aida : std_logic_vector(g_NUM_DUTS-1 downto 0) := (others => '0');
   signal s_DUT_mask : std_logic_vector(g_NUM_DUTS-1 downto 0) := (others => '0');   	--! Mask for the DUTs used. 1 = active
   signal s_dut_clk_is_output : std_logic_vector(g_NUM_DUTS-1 downto 0) := (others => '1');  --! Set low to enable transmission of clock from TLU to DUT
-
+  signal s_veto_from_duts : std_logic; --! Goes high if any of the DUTs are busy
+    
   constant c_NUM_EUDET_FSM_BITS : positive := 4;
   signal s_dut_fsm_status_eudet : std_logic_vector((c_NUM_EUDET_FSM_BITS*g_NUM_DUTS)-1 downto 0) ; --! Stores status from EUDET interface FSM. Can only support up to 32/4 = 8 DUT interfaces, not 12...
 
@@ -121,51 +123,62 @@ ARCHITECTURE rtl OF DUTInterfaces IS
 
   
   -- Signal for IPBus
-  constant c_N_CTRL : positive := 9;
-  constant c_N_STAT : positive := 9;
-  signal s_status_to_ipbus, s_sync_status_to_ipbus : ipb_reg_v(c_N_STAT-1 downto 0);
-  signal s_control_from_ipbus,s_sync_control_from_ipbus : ipb_reg_v(c_N_CTRL-1 downto 0);
-                                                               
+  constant c_N_CTRL : positive := 8;
+  constant c_N_STAT : positive := 8;
+--  signal s_status_to_ipbus, s_sync_status_to_ipbus : ipb_reg_v(c_N_STAT-1 downto 0);
+--  signal s_control_from_ipbus,s_sync_control_from_ipbus : ipb_reg_v(c_N_CTRL-1 downto 0);
+  signal s_status_to_ipbus : ipb_reg_v(c_N_STAT-1 downto 0);
+  signal s_sync_control_from_ipbus : ipb_reg_v(c_N_CTRL-1 downto 0);
+                                  
+  constant c_qmask : ipb_reg_v(c_N_CTRL-1 downto 0) := (others => (others => '1'));
+                  
+  attribute mark_debug : string;
+  attribute mark_debug of s_IgnoreShutterVeto: signal is "true";
+  attribute mark_debug of s_DUT_ignore_busy: signal is "true";
+                                                    
 BEGIN
 
   
   -----------------------------------------------------------------------------
   -- IPBus interface 
   -----------------------------------------------------------------------------
-  ipbus_registers: entity work.ipbus_ctrlreg_v
+  ipbus_registers: entity work.ipbus_syncreg_v
     generic map(
       N_CTRL => c_N_CTRL,
       N_STAT => c_N_STAT
       )
     port map(
       clk => ipbus_clk_i,
-      reset=> '0',--ipbus_reset_i ,
-      ipbus_in=>  ipbus_i,
-      ipbus_out=> ipbus_o,
-      d=>  s_sync_status_to_ipbus,
-      q=>  s_control_from_ipbus,
-      stb=>  open
+      rst=> '0',--ipbus_reset_i ,
+      ipb_in=>  ipbus_i,
+      ipb_out=> ipbus_o,
+      slv_clk => clk_4x_logic_i,
+      d=>  s_status_to_ipbus,
+      q=>  s_sync_control_from_ipbus,
+      qmask => c_qmask,
+      stb=>  open,
+      rstb => open
       );
 
-  -- Synchronize registers from logic clock to ipbus.
-    sync_status: entity work.synchronizeRegisters
-    generic map (
-      g_NUM_REGISTERS => c_N_STAT )
-    port map (
-      clk_input_i => clk_4x_logic_i,
-      data_i      =>  s_status_to_ipbus,
-      data_o      => s_sync_status_to_ipbus,
-      clk_output_i => ipbus_clk_i);
+--  -- Synchronize registers from logic clock to ipbus.
+--    sync_status: entity work.synchronizeRegisters
+--    generic map (
+--      g_NUM_REGISTERS => c_N_STAT )
+--    port map (
+--      clk_input_i => clk_4x_logic_i,
+--      data_i      =>  s_status_to_ipbus,
+--      data_o      => s_sync_status_to_ipbus,
+--      clk_output_i => ipbus_clk_i);
 
-    -- Synchronize registers from logic clock to ipbus.
-    sync_ctrl: entity work.synchronizeRegisters
-    generic map (
-      g_NUM_REGISTERS => c_N_CTRL )
-    port map (
-      clk_input_i => ipbus_clk_i,
-      data_i      =>  s_control_from_ipbus,
-      data_o      => s_sync_control_from_ipbus,
-      clk_output_i => clk_4x_logic_i);
+--    -- Synchronize registers from logic clock to ipbus.
+--    sync_ctrl: entity work.synchronizeRegisters
+--    generic map (
+--      g_NUM_REGISTERS => c_N_CTRL )
+--    port map (
+--      clk_input_i => ipbus_clk_i,
+--      data_i      =>  s_control_from_ipbus,
+--      data_o      => s_sync_control_from_ipbus,
+--      clk_output_i => clk_4x_logic_i);
 
   -- Map the control registers
   s_DUT_mask                    <= s_sync_control_from_ipbus(0)(g_NUM_DUTS-1 downto 0);
@@ -289,7 +302,7 @@ BEGIN
         trigger_i               => trigger_i , 
         reset_or_clk_to_dut_i   => reset_or_clk_to_dut_i,
         shutter_to_dut_i        => shutter_to_dut_i ,
-        ignore_shutter_veto_i   => s_IgnoreShutterVeto ,
+        -- ignore_shutter_veto_i   => s_IgnoreShutterVeto ,
         ignore_dut_busy_i       => s_DUT_ignore_busy(dut),
         --dut_mask_i              => s_DUT_mask(dut),
         busy_o                  => s_dut_veto_aida(dut),
@@ -317,7 +330,7 @@ BEGIN
         system_clk_i          => clk_4x_logic_i ,
         reset_or_clk_to_dut_i => reset_or_clk_to_dut_i,
         shutter_to_dut_i      => shutter_to_dut_i ,
-        ignore_shutter_veto_i => s_IgnoreShutterVeto ,
+        -- ignore_shutter_veto_i => s_IgnoreShutterVeto ,
         enable_dut_veto_i     => s_dut_enable_veto_eudet(dut),
         -- Connections to DUT:
         dut_clk_i             => s_clk_from_dut_eudet(dut),
@@ -337,8 +350,9 @@ BEGIN
   s_dut_clk_is_output <= not s_DUT_aida_eudet_mode; -- at the moment can hardwire clk_is_output to mode_is_aida
                                                
   s_intermediate_busy_or(0) <= '0';
-  veto_o <=  s_intermediate_busy_or(g_NUM_DUTS);
-
+  s_veto_from_duts <=  s_intermediate_busy_or(g_NUM_DUTS);
+  veto_o <= '0' when s_veto_from_duts ='0' and ((s_IgnoreShutterVeto = '1') or (shutter_veto_i = '0')) else '1';
+  
   -- purpose: Multiplexes signals between EUDET and AIDA interfaces
   -- type   : combinational
   -- inputs : clk_4x_logic_i 

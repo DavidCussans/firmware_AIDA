@@ -12,11 +12,15 @@ from I2CuHal import I2CCore
 from si5345 import si5345 # Library for clock chip
 from AD5665R import AD5665R # Library for DAC
 from PCA9539PW import PCA9539PW # Library for serial line expander
+from I2CDISP import CFA632 #Library for display
+from TLU_powermodule import PWRLED
+from ATSHA204A import ATSHA204A
 
 class TLU:
     """docstring for TLU"""
     def __init__(self, dev_name, man_file, parsed_cfg):
 
+        uhal.setLogLevelTo(uhal.LogLevel.NOTICE) ## Get rid of initial flood of IPBUS messages
         self.isRunning= False
 
         section_name= "Producer.fmctlu"
@@ -55,6 +59,15 @@ class TLU:
 
         enableCore= True #Only need to run this once, after power-up
         self.enableCore()
+        ####### EEPROM AX3 testing
+        doAtmel= False
+        if doAtmel:
+            self.ax3eeprom= ATSHA204A(self.TLU_I2C, 0x64)
+            print "shiftR\tdatBit\tcrcBit\tcrcReg \n", self.ax3eeprom._CalculateCrc([255, 12, 54, 28, 134, 89], 3)
+            self.ax3eeprom._wake(True, True)
+            print self.ax3eeprom._GetCommandPacketSize(8)
+            #self.eepromAX3read()
+        ####### EEPROM AX3 testing end
 
         # Instantiate clock chip and configure it (if necessary)
         #self.zeClock=si5345(self.TLU_I2C, 0x68)
@@ -64,7 +77,7 @@ class TLU:
         if (int(parsed_cfg.get(section_name, "CONFCLOCK"), 16)):
             #clkRegList= self.zeClock.parse_clk("./../../bitFiles/TLU_CLK_Config_v1e.txt")
             clkRegList= self.zeClock.parse_clk(parsed_cfg.get(section_name, "CLOCK_CFG_FILE"))
-            self.zeClock.writeConfiguration(clkRegList)######
+            self.zeClock.writeConfiguration(clkRegList, self.verbose)######
 
         self.zeClock.checkDesignID()
 
@@ -100,6 +113,43 @@ class TLU:
         self.IC7.setInvertReg(1, 0x00)# 0= normal, 1= inverted
         self.IC7.setIOReg(1, 0x00)# 0= output, 1= input
         self.IC7.setOutputs(1, 0xB0)# If output, set to XX
+
+        #Instantiate Display
+        self.DISP=CFA632(self.TLU_I2C, 0x2A) #
+
+        #Instantiate Power/Led Module
+        dac_addr_module= int(parsed_cfg.get(section_name, "I2C_DACModule_Addr"), 16)
+        exp1_addr= int(parsed_cfg.get(section_name, "I2C_EXP1Module_Addr"), 16)
+        exp2_addr= int(parsed_cfg.get(section_name, "I2C_EXP2Module_Addr"), 16)
+        pmtCtrVMax= parsed_cfg.getfloat(section_name, "PMT_vCtrlMax")
+
+        self.pwdled= PWRLED(self.TLU_I2C, dac_addr_module, pmtCtrVMax, exp1_addr, exp2_addr)
+
+        #self.pwdled.setIndicatorRGB(1, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(2, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(3, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(4, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(5, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(6, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(7, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(8, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(9, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(10, [0, 0, 1])
+        #self.pwdled.setIndicatorRGB(11, [0, 0, 1])
+
+        self.pwdled.allGreen()
+        time.sleep(0.1)
+        self.pwdled.allBlue()
+        time.sleep(0.1)
+        self.pwdled.allBlack()
+        time.sleep(0.1)
+        #self.pwdled.kitt()
+        time.sleep(0.1)
+        #self.pwdled.allBlack()
+        #self.pwdled.allRed()
+        #time.sleep(0.1)
+        self.pwdled.allWhite()
+
 
 
 ##################################################################################################################################
@@ -180,7 +230,10 @@ class TLU:
         newStatus= oldStatus & ~mask #set both bits to zero
         outStat= ""
         if clkSrc==0:
-            newStatus = newStatus | mask
+#--- ./TLU_v1e.py 183
+#            newStatus = newStatus | mask
+#+++ /users/phdgc/firmware_AIDA_PaoloGB/firmware_AIDA/TLU_v1e/scripts/TLU_v1e.py 233
+            newStatus = newStatus
             outStat= "disabled"
         elif clkSrc==1:
             newStatus = newStatus | maskLow
@@ -193,6 +246,23 @@ class TLU:
             print "\tOldStatus= ", "{0:#0{1}x}".format(oldStatus,4), "Mask=" , hex(mask), "newStatus=", "{0:#0{1}x}".format(newStatus,4)
         self.IC7.setOutputs(bank, newStatus)
         return newStatus
+
+    def eepromAX3read(self):
+        mystop=True
+        print "  Reading AX3 eeprom (not working 100% yet):"
+        myslave= 0x64
+        self.TLU_I2C.write(myslave, [0x02, 0x00])
+        nwords= 5
+        res= self.TLU_I2C.read( myslave, nwords)
+        print "\tAX3 awake: ", res
+        mystop=True
+        nwords= 7
+        #mycmd= [0x03, 0x07, 0x02, 0x00, 0x00, 0x00, 0x1e, 0x2d]#conf 0?
+        mycmd= [0x03, 0x07, 0x02, 0x00, 0x01, 0x00, 0x17, 0xad]#conf 1 <<< seems to reply with correct error code (0)
+        #mycmd= [0x03, 0x07, 0x02, 0x02, 0x00, 0x00, 0x1d, 0xa8]#data 0?
+        self.TLU_I2C.write(myslave, mycmd, mystop)
+        res= self.TLU_I2C.read( myslave, nwords)
+        print "\tAX3 EEPROM: ", res
 
     def enableClkLEMO(self, enable= False, verbose= False):
         ## Enable or disable the output clock to the differential LEMO output
@@ -634,12 +704,8 @@ class TLU:
         self.getVetoDUT()
 
     def setVetoShutters(self, newState):
-        if newState:
-            print "  IgnoreShutterVetoW SET TO LISTEN FOR VETO FROM SHUTTER"
-            cmd= int("0x0",16)
-        else:
-            print "  IgnoreShutterVetoW SET TO IGNORE VETO FROM SHUTTER"
-            cmd= int("0x1",16)
+        cmd = int(newState)
+        print " Setting IgnoreShutterVetoW to ", hex(newState)
         self.hw.getNode("DUTInterfaces.IgnoreShutterVetoW").write(cmd)
         self.hw.dispatch()
         self.getVetoShutters()
@@ -865,6 +931,16 @@ class TLU:
         # # Stop internal triggers until setup complete
         cmd = int("0x0",16)
         self.setInternalTrg(cmd)
+
+        # # Set the control voltages for the PMTs
+        PMT1_V= parsed_cfg.getfloat(section_name, "PMT1_V")
+        PMT2_V= parsed_cfg.getfloat(section_name, "PMT2_V")
+        PMT3_V= parsed_cfg.getfloat(section_name, "PMT3_V")
+        PMT4_V= parsed_cfg.getfloat(section_name, "PMT4_V")
+        self.pwdled.setVch(0, PMT1_V, True)
+        self.pwdled.setVch(1, PMT2_V, True)
+        self.pwdled.setVch(2, PMT3_V, True)
+        self.pwdled.setVch(3, PMT4_V, True)
 
         # # Set pulse stretches
         str0= parsed_cfg.getint(section_name, "in0_STR")

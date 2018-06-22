@@ -25,7 +25,7 @@ entity DUTInterface_EUDET is
     system_clk_i : in std_logic;          --! rising edge active clock from TLU
     reset_or_clk_to_dut_i   : IN     std_logic;  --! Synchronization signal. Passed to DUT pins
     shutter_to_dut_i        : IN     std_logic;  --! Goes high to indicate data-taking active. DUTs report busy unless ignoreShutterVeto flag set high
-    ignore_shutter_veto_i        : in     std_logic;
+    -- ignore_shutter_veto_i        : in     std_logic;
     enable_dut_veto_i : in std_logic;      --! If high: if DUT raises dut_busy_i, then  busy_o is raised
     -- Connections to DUT:
     dut_clk_i : in std_logic;             --! rising edge active clock from DUT
@@ -244,9 +244,9 @@ end process;
   begin  -- process set_muxsel
     if rising_edge(system_clk_i) then
           if (state = IDLE) then
-            busy_o <= '0';
+            busy_o <= '0'; -- If idle, then busy is low.
           else
-            busy_o <= '1';
+            busy_o <= '1'; -- For all other states, busy is high
           end if;
     end if;
  end process set_busy;

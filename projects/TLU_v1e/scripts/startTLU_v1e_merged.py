@@ -60,6 +60,17 @@ class MyPrompt(cmd.Cmd):
             print "\t Could not retrieve CONF data."
             return
 
+    def do_i2c(self, args):
+	arglist = args.split()
+        if len(arglist) == 0:
+            print "\tno command specified"
+        else:
+            i2ccmd= arglist[0]
+            results = list(map(int, arglist))
+	    TLU.DISP.writeSomething(results)
+	    print "Sending i2c command to display"
+	return
+
     def do_id(self, args):
         """Interrogates the TLU and prints it unique ID on screen"""
         TLU.getSN()
@@ -84,7 +95,6 @@ class MyPrompt(cmd.Cmd):
             runN= arglist[0]
 
         logdata= True
-#        logdata= False
 
         #TLU.start(logdata)
         if (TLU.isRunning): #Prevent double start
@@ -230,7 +240,7 @@ if __name__ == "__main__":
     ###TLU.stop(False, False)
 
     # Start interactive prompt
-    print "=+=================================================================="
+    print "===================================================================="
     print "==========================TLU TEST CONSOLE=========================="
-    print "+==================================================================="
+    print "===================================================================="
     prompt.cmdloop("Type 'help' for a list of commands.")
