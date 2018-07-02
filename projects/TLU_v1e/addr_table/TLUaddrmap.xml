@@ -17,12 +17,12 @@
 </node>
 
 <node id="Shutter"    address="0x2000" description="Shutter/T0 control" fwinfo="endpoint;width=4">
-  <node id="ControlW"               address="0x0" permission="rw" description="Bit-0 controls if shutter pulses are active. 1 = active"/>
-  <node id="ShutterSelectW"         address="0x1" permission="rw" description="Selects which input is used to trigger shutter"/>
-  <node id="InternalShutterPeriodW" address="0x2" permission="rw" description="Internal trig generator period ( units = number of strobe pulses)"/>
-  <node id="ShutterOnTimeW"         address="0x3" permission="rw" description="Time between input trigger being received and shutter asserted(T1) ( units = number of strobe pulses)"/>
-  <node id="VetoOffTimeW"         address="0x4" permission="rw" description="time between input trigger and veto being de-asserted(T2) ( units = number of strobe pulses)"/>
-  <node id="ShutterOffTimeW"         address="0x5" permission="rw" description="time between input trigger and time at which shutter de-asserted and veto reasserted(T3) ( units = number of strobe pulses)"/>  
+  <node id="ControlRW"               address="0x0" permission="rw" description="Bit-0 controls if shutter pulses are active. 1 = active"/>
+  <node id="ShutterSelectRW"         address="0x1" permission="rw" description="Selects which input is used to trigger shutter"/>
+  <node id="InternalShutterPeriodRW" address="0x2" permission="rw" description="Internal trig generator period ( units = number of strobe pulses)"/>
+  <node id="ShutterOnTimeRW"         address="0x3" permission="rw" description="Time between input trigger being received and shutter asserted(T1) ( units = number of strobe pulses)"/>
+  <node id="VetoOffTimeRW"         address="0x4" permission="rw" description="time between input trigger and veto being de-asserted(T2) ( units = number of strobe pulses)"/>
+  <node id="ShutterOffTimeRW"         address="0x5" permission="rw" description="time between input trigger and time at which shutter de-asserted and veto reasserted(T3) ( units = number of strobe pulses)"/>  
   <node id="PulseT0"                address="0x8" permission="rw" description="Writing to Bit-0 of this register causes sync line to pulse for one strobe-pulse interval"/>
 </node>
 <!-- I2C registers. Tested ok.-->
