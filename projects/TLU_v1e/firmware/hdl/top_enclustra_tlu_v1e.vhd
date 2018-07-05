@@ -25,7 +25,7 @@ use work.ipbus.ALL;
 
 entity top is
     generic(
-    constant FW_VERSION : unsigned(31 downto 0):= X"1e000010"; -- Firmware revision. Remember to change this as needed.
+    constant FW_VERSION : unsigned(31 downto 0):= X"1e000011"; -- Firmware revision. Remember to change this as needed.
     g_NUM_DUTS  : positive := 4; -- <- was 3
     g_NUM_TRIG_INPUTS   :positive := 6;-- <- was 4
     g_NUM_EDGE_INPUTS   :positive := 6;--  <-- was 4
@@ -106,7 +106,7 @@ architecture rtl of top is
 	--signal s_i2c_scl_i : std_logic;
 	------------------------------------------
 	-- Internal signal declarations
-    SIGNAL T0_o                  : std_logic;
+    SIGNAL s_T0                  : std_logic;
     SIGNAL buffer_full_o         : std_logic;                                             --! Goes high when event buffer almost full
     SIGNAL clk_8x_logic         : std_logic;                                             -- 320MHz clock
     SIGNAL clk_4x_logic          : std_logic;                                             --! normally 160MHz
@@ -132,6 +132,7 @@ architecture rtl of top is
     --SIGNAL s_i2c_scl_enb         : std_logic;
     --SIGNAL s_i2c_sda_enb         : std_logic;
     SIGNAL s_shutter             : std_logic;                                             --! shutter signal from TimePix, retimed onto local clock
+    signal s_run_active          : std_logic;    --! Goes high when run is active.
     SIGNAL s_triggerLogic_reset  : std_logic;
     SIGNAL shutter_cnt_i         : std_logic_vector(g_SPILL_COUNTER_WIDTH-1 DOWNTO 0);
     SIGNAL shutter_i             : std_logic;
@@ -142,8 +143,8 @@ architecture rtl of top is
     SIGNAL trigger_count         : std_logic_vector(g_IPBUS_WIDTH-1 DOWNTO 0);
     SIGNAL trigger_times         : t_triggerTimeArray(g_NUM_TRIG_INPUTS-1 DOWNTO 0);      --! trigger arrival time ( w.r.t. logic_strobe)
     SIGNAL triggers              : std_logic_vector(g_NUM_TRIG_INPUTS-1 DOWNTO 0);        --! Rising edge of trigger inputs
-    SIGNAL veto_o                : std_logic;                                             --! goes high when one or more DUT are busy
-    signal shutter_veto_o        : std_logic;  --! Goes high when triggers should be vetoed by shutter
+    SIGNAL s_veto                : std_logic;                                             --! goes high when one or more DUT are busy
+    signal s_shutter_veto        : std_logic;  --! Goes high when triggers should be vetoed by shutter
 	signal ctrl, stat: ipb_reg_v(0 downto 0);
 	--My signals
 	--SIGNAL busy_toggle_o         : std_logic_vector(g_NUM_DUTS-1 downto 0);
@@ -191,6 +192,7 @@ architecture rtl of top is
         ipbus_clk_i   : IN     std_logic;
         ipbus_i       : IN     ipb_wbus;
         T0_o          : OUT    std_logic;
+        run_active_o  : out    std_logic;
         accelerator_signals_i : in std_logic_vector(g_NUM_ACCELERATOR_SIGNALS-1 DOWNTO 0);  
         ipbus_o       : OUT    ipb_rbus;
         shutter_veto_o: out    std_logic;
@@ -410,14 +412,14 @@ begin
     -- ModuleWare code(v1.12) for instance 'I19' of 'merge'
     --gpio_hdr <= dout1 & dout & s_shutter & T0_o;
     -- ModuleWare code(v1.12) for instance 'I8' of 'sor'
-    overall_veto <= buffer_full_o OR veto_o ; -- or shutter_veto_o;
+    overall_veto <= buffer_full_o OR s_veto or s_shutter_veto when rising_edge(clk_4x_logic);
     -- ModuleWare code(v1.12) for instance 'I16' of 'sor'
-    s_triggerLogic_reset <= logic_reset OR T0_o;
+    s_triggerLogic_reset <= logic_reset OR s_T0;
 
     i2c_reset <= '1';
     clk_gen_rst <= '1';
     ---gpio <= strobe_8x_logic;---
-    gpio <= veto_o;---
+    gpio <= s_veto;---
     --gpio <= busy_i(1);---
     
     --Set diff clock out to 0 because we cannot have the correct differential voltage output
@@ -582,7 +584,7 @@ begin
         ipbus_o                => ipbrr(N_SLV_EVENT_FORMATTER),
         data_strobe_o          => data_strobe,
         event_data_o           => event_data,
-        reset_timestamp_i      => T0_o,
+        reset_timestamp_i      => s_T0,
         reset_timestamp_o      => OPEN
     );
 
@@ -614,9 +616,10 @@ begin
         clk_4x_i      => clk_4x_logic,
         clk_4x_strobe_i => strobe_4x_logic,
         accelerator_signals_i => triggers,
-        T0_o          => T0_o,
+        T0_o          => s_T0,
+        run_active_o  => s_run_active,
         shutter_o     => s_shutter,
-        shutter_veto_o => shutter_veto_o,
+        shutter_veto_o => s_shutter_veto,
         ipbus_clk_i   => clk_ipb,
         ipbus_i       => ipbww(N_SLV_SHUTTER),
         ipbus_o       => ipbrr(N_SLV_SHUTTER)
@@ -633,9 +636,9 @@ begin
          strobe_4x_logic_i       => strobe_4x_logic,
          trigger_counter_i       => trigger_count,
          trigger_i               => overall_trigger,
-         reset_or_clk_to_dut_i   => T0_o,
+         reset_or_clk_to_dut_i   => s_T0,
          shutter_to_dut_i        => s_shutter,
-         shutter_veto_i          => shutter_veto_o,
+         shutter_veto_i          => s_shutter_veto,
          ipbus_clk_i             => clk_ipb,
          ipbus_i                 => ipbww(N_SLV_DUTINTERFACES),
          ipbus_reset_i           => rst_ipb,
@@ -651,7 +654,7 @@ begin
          --shutter_to_dut_n_o      => shutter_to_dut_n_o,
          --shutter_to_dut_p_o      => shutter_to_dut_p_o,
          shutter_to_dut  => cont_o,
-         veto_o                  => veto_o
+         veto_o                  => s_veto
     );
     
 ------------------------------------------ 

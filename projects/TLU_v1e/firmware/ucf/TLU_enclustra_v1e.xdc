@@ -129,6 +129,9 @@ create_clock -period 25.000 -name sysclk_40_i_p -waveform {0.000 12.500} [get_po
 set_input_delay -clock [get_clocks [get_clocks -of_objects [get_pins I4/pll_base_inst/CLKOUT0]]] -rise -min 0.300 [get_ports -regexp -filter { NAME =~  ".*thresh.*" && DIRECTION == "IN" }]
 set_input_delay -clock [get_clocks [get_clocks -of_objects [get_pins I4/pll_base_inst/CLKOUT0]]] -rise -max 1.400 [get_ports -regexp -filter { NAME =~  ".*thresh.*" && DIRECTION == "IN" }]
 set_clock_groups -asynchronous -group [list [get_clocks clk_ipb_i] [get_clocks sysclk]] -group [list [get_clocks s_clk160] [get_clocks sysclk_40_i_p]]
+connect_debug_port u_ila_0/probe13 [get_nets [list shutter_veto_o]]
+connect_debug_port u_ila_0/probe16 [get_nets [list veto_i]]
+
 create_debug_core u_ila_0 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
@@ -141,12 +144,12 @@ set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
 set_property port_width 1 [get_debug_ports u_ila_0/clk]
 connect_debug_port u_ila_0/clk [get_nets [list I4/clk_4x_logic_o]]
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
-set_property port_width 6 [get_debug_ports u_ila_0/probe0]
-connect_debug_port u_ila_0/probe0 [get_nets [list {I5/trigger_o[0]} {I5/trigger_o[1]} {I5/trigger_o[2]} {I5/trigger_o[3]} {I5/trigger_o[4]} {I5/trigger_o[5]}]]
+set_property port_width 4 [get_debug_ports u_ila_0/probe0]
+connect_debug_port u_ila_0/probe0 [get_nets [list {I9/s_DUT_ignore_busy[0]} {I9/s_DUT_ignore_busy[1]} {I9/s_DUT_ignore_busy[2]} {I9/s_DUT_ignore_busy[3]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
-set_property port_width 4 [get_debug_ports u_ila_0/probe1]
-connect_debug_port u_ila_0/probe1 [get_nets [list {I9/s_DUT_ignore_busy[0]} {I9/s_DUT_ignore_busy[1]} {I9/s_DUT_ignore_busy[2]} {I9/s_DUT_ignore_busy[3]}]]
+set_property port_width 6 [get_debug_ports u_ila_0/probe1]
+connect_debug_port u_ila_0/probe1 [get_nets [list {I5/trigger_o[0]} {I5/trigger_o[1]} {I5/trigger_o[2]} {I5/trigger_o[3]} {I5/trigger_o[4]} {I5/trigger_o[5]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
 set_property port_width 6 [get_debug_ports u_ila_0/probe2]
@@ -194,23 +197,15 @@ connect_debug_port u_ila_0/probe12 [get_nets [list I6/s_trigger]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe13]
 set_property port_width 1 [get_debug_ports u_ila_0/probe13]
-connect_debug_port u_ila_0/probe13 [get_nets [list shutter_veto_o]]
+connect_debug_port u_ila_0/probe13 [get_nets [list I6/trigger_i]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe14]
 set_property port_width 1 [get_debug_ports u_ila_0/probe14]
-connect_debug_port u_ila_0/probe14 [get_nets [list I6/trigger_i]]
+connect_debug_port u_ila_0/probe14 [get_nets [list I10/cmp_coincidence_logic/trigger_o]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe15]
 set_property port_width 1 [get_debug_ports u_ila_0/probe15]
-connect_debug_port u_ila_0/probe15 [get_nets [list I10/cmp_coincidence_logic/trigger_o]]
-create_debug_port u_ila_0 probe
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe16]
-set_property port_width 1 [get_debug_ports u_ila_0/probe16]
-connect_debug_port u_ila_0/probe16 [get_nets [list veto_i]]
-create_debug_port u_ila_0 probe
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe17]
-set_property port_width 1 [get_debug_ports u_ila_0/probe17]
-connect_debug_port u_ila_0/probe17 [get_nets [list I9/veto_o]]
+connect_debug_port u_ila_0/probe15 [get_nets [list I9/veto_o]]
 set_property C_CLK_INPUT_FREQ_HZ 300000000 [get_debug_cores dbg_hub]
 set_property C_ENABLE_CLK_DIVIDER false [get_debug_cores dbg_hub]
 set_property C_USER_SCAN_CHAIN 1 [get_debug_cores dbg_hub]
