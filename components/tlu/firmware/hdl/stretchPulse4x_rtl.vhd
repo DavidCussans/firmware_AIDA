@@ -11,6 +11,8 @@ USE ieee.std_logic_1164.all;
 --! @author David Cussans
 
 entity stretchPulse4x is
+  generic (
+    g_FIND_RISING_EDGE : boolean := true);  -- ! Set true to look for rising edge of input signal. NB. "false" Not implemented yet.
   port (
     clk_4x_i                    : in  std_logic;    --! system clock
     clk_4x_strobe_i               : in  std_logic;    --! strobes high for one cycle every 4 of clk_4x
