@@ -62,7 +62,7 @@ ENTITY T0_Shutter_Iface IS
 
       --! Output Signals
       shutter_o: OUT STD_LOGIC; --! Shutter signal.
-      shutter_veto_o: OUT STD_LOGIC; --! Goes high when shutter vetoes triggers
+      shutter_veto_o: OUT STD_LOGIC; --! Goes high when shutter vetoes triggers. NB. Should be *low* when shutters are disabled.
       run_active_o: out std_logic;      --! goes high when run is active.
       T0_o: out std_logic --! T0 synchronization pulse. Pulses on leading edge of run_active_o
       );

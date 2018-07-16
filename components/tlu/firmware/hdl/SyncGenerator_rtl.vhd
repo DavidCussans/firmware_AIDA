@@ -33,7 +33,7 @@ use IEEE.math_real.all;
 --! At time T1 after Emin signal shutter_o goes higher
 --! At time T2 after Emin veto_o goes low
 --! At time T3 after Emin shutter_o goes low and veto_o goes high.
---
+--! ( If sequence is not enabled, then veto_o is always low. )
 --! \n\n<b>Last changes:</b>\n
 --!
 
@@ -187,9 +187,10 @@ BEGIN
     END IF;
   END PROCESS p_comparators;
 
-  -- sequence: Emin --> Shutter-on --> Veto-off --> (shutter-off,veto-on)
-  -- NB. Need to ensure T1 < T2 < T3
-  s_veto <= '0' when (s_counter_lt_t3 ='1') and (s_counter_lt_t2 = '0') else '1';
+  --! sequence: Emin --> Shutter-on --> Veto-off --> (shutter-off,veto-on)
+  --! NB. Need to ensure T1 < T2 < T3
+  --! If enable_sequence_i=0 then veto is always low. 
+  s_veto <= '0' when ((s_counter_lt_t3 ='1') and (s_counter_lt_t2 = '0')) or (enable_sequence_i='0') else '1';
   s_shutter <= '1' when (s_counter_lt_t3 ='1') and (s_counter_lt_t1 = '0') else '0';
 
   --! Process to set output signals
